@@ -1,0 +1,7 @@
+school
+ ~52k 
+ ~47.5k clean
+
+non_school
+ ~ 347k
+ ~ 256k clean

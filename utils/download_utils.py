@@ -43,6 +43,10 @@ def _query_osm(iso_code, out_file, query):
         ({query});
         out center;
     """
+
+    # print(query)
+    # print(osm_query)
+
     data = api.get(osm_query, verbosity="geom")
     with open(out_file, "w") as file:
         geojson.dump(data, file)

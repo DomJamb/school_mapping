@@ -17,14 +17,14 @@ warnings.simplefilter("ignore")
 
 def main():
     parser = argparse.ArgumentParser(description="Data Cleaning Pipeline")
-    parser.add_argument("--config", help="Config file")
+    parser.add_argument("--config", help="Config file", default="configs/config_full.yaml")
     args = parser.parse_args()
     
     cwd = os.path.dirname(os.getcwd())
     config_file = os.path.join(cwd, args.config)
     config = config_utils.load_config(config_file)
 
-    clean_utils.clean_data(config, category=config["pos_class"])
+    #clean_utils.clean_data(config, category=config["pos_class"])
     clean_utils.clean_data(config, category=config["neg_class"])
 
 
