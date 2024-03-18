@@ -1,0 +1,14 @@
+config i data_config sam morao spojiti u jedan config_full
+
+download_utils
+	- load_unicef se ne može izvršiti jer nedostaje data/vectors/ direktorij
+	- download_overtune se ne može izvršiti, nastane error kod database query-a (names polje)
+
+
+clean_utils
+	- kod pročišćavanja podataka dođe do problema kod iso_code NGA (neki problem s csgraph) iz osm podataka
+	- ghls se koristi, koliko sam razumio, kao moguća zamjena za ms_building kod uklanjanja nenastanjenih lokacija
+
+
+sat_downlaod
+	- uspio sam spojiti njihovu skriptu na download_satellite_images.py, ali jedan problem ostaje parametar SR koji nisam siguran kako se koristi. U skripti download_satellite_images.py sam morao promijeniti u url SR sa 4326 na 3857 kako bi donekle radilo, ali i dalje za pola slika dobijem error 500

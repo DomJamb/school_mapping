@@ -380,16 +380,19 @@ def get_counts(config, column='iso', layer="clean"):
     
     iso_codes = config["iso_codes"]
     for iso_code in (pbar := _create_progress_bar(iso_codes)):
-        pbar.set_description(f"Reading {iso_code}")
-        for category in categories:
-            dir = os.path.join(cwd, config['vectors_dir'], category)
-            filepath = os.path.join(dir, layer, f"{iso_code}_{layer}.geojson")
-            subdata = gpd.read_file(filepath)
-            if "clean" in subdata.columns:
-                subdata = subdata[subdata["clean"] == 0]
-            if "validated" in subdata.columns:
-                subdata = subdata[subdata["validated"] == 0]
-            data[category].append(subdata)
+        try:
+            pbar.set_description(f"Reading {iso_code}")
+            for category in categories:
+                dir = os.path.join(cwd, config['vectors_dir'], category)
+                filepath = os.path.join(dir, layer, f"{iso_code}_{layer}.geojson")
+                subdata = gpd.read_file(filepath)
+                if "clean" in subdata.columns:
+                    subdata = subdata[subdata["clean"] == 0]
+                if "validated" in subdata.columns:
+                    subdata = subdata[subdata["validated"] == 0]
+                data[category].append(subdata)
+        except:
+            print(f"problem sa iso code {iso_code}")
 
     for key, values in data.items():
         data[key] = pd.concat(values)
