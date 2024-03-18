@@ -15,11 +15,11 @@ warnings.simplefilter("ignore")
 
 def download_data(config):
     # Load UNICEF data
-    unicef = download_utils.load_unicef(config)
+    #unicef = download_utils.load_unicef(config)
 
     # Download Overture data
-    overture_schools = download_utils.download_overture(config, category="school")
-    overture_nonschools = download_utils.download_overture(config, category="non_school", exclude="school")
+    #overture_schools = download_utils.download_overture(config, category="school")
+    #overture_nonschools = download_utils.download_overture(config, category="non_school", exclude="school")
 
     # Download OSM data
     osm_schools = download_utils.download_osm(config, category="school")
@@ -31,7 +31,7 @@ def download_data(config):
 
 def main():
     parser = argparse.ArgumentParser(description="Satellite Image Download")
-    parser.add_argument("--config", help="Config file")
+    parser.add_argument("--config", help="Config file", default="configs/config_full.yaml")
     args = parser.parse_args()
     
     # Load config file

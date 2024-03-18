@@ -17,7 +17,7 @@ def create_config(config_file, prefix=""):
     Returns:
     - dict: The config as a dictionary.
     """
-    with open(config_file, "r") as stream:
+    with open(config_file, "r", encoding="utf8") as stream:
         config = yaml.safe_load(stream)
 
     cfg = EasyDict()
