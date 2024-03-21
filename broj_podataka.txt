@@ -5,3 +5,10 @@ school
 non_school
  ~ 347k
  ~ 256k clean
+
+
+
+KONAČNI BROJ (OSM) SLIKA:
+
+school: 33907
+non_school: 224885
