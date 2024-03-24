@@ -470,72 +470,72 @@ def clean_data(config, category, name="clean", source="ms", id="UID"):
             pbar.set_description(f"Processing {iso_code}")
             out_subfile = os.path.join(out_dir, f"{iso_code}_{name}.geojson")
 
-        if not os.path.exists(out_subfile):
-            # Join the dataset with ADM1 geoboundaries
-            subdata = data[data["iso"] == iso_code].reset_index(drop=True)
-            logging.info(f"Dimensions: {subdata.shape}")
-            geoboundaries = data_utils._get_geoboundaries(config, iso_code, adm_level="ADM1")
-            geoboundaries = geoboundaries[["shapeName", "geometry"]].dropna(subset=["shapeName"])
-            subdata = subdata.sjoin(geoboundaries, how="left", predicate="within")
-            subdata[name], subdata[source] = 0, 0
-            logging.info(f"Dimensions: {subdata.shape}")
-    
-            # Split the data into smaller admin boundaries for scalability
-            for shape_name in subdata.shapeName.unique():
-                pbar.set_description(f"Processing {iso_code} {shape_name}")
-                subsubdata = subdata[subdata["shapeName"] == shape_name]
-                subsubdata = subsubdata[config["columns"]].reset_index(drop=True)
-                if len(subsubdata) == 0:
-                    continue
+            if not os.path.exists(out_subfile):
+                # Join the dataset with ADM1 geoboundaries
+                subdata = data[data["iso"] == iso_code].reset_index(drop=True)
+                logging.info(f"Dimensions: {subdata.shape}")
+                geoboundaries = data_utils._get_geoboundaries(config, iso_code, adm_level="ADM1")
+                geoboundaries = geoboundaries[["shapeName", "geometry"]].dropna(subset=["shapeName"])
+                subdata = subdata.sjoin(geoboundaries, how="left", predicate="within")
+                subdata[name], subdata[source] = 0, 0
+                logging.info(f"Dimensions: {subdata.shape}")
+        
+                # Split the data into smaller admin boundaries for scalability
+                for shape_name in subdata.shapeName.unique():
+                    pbar.set_description(f"Processing {iso_code} {shape_name}")
+                    subsubdata = subdata[subdata["shapeName"] == shape_name]
+                    subsubdata = subsubdata[config["columns"]].reset_index(drop=True)
+                    if len(subsubdata) == 0:
+                        continue
 
-                    # Remove objects containing certain keywords
-                    if category == config["pos_class"]:
-                        subsubdata = _filter_keywords(
-                            subsubdata, exclude=config["exclude"]
+                        # Remove objects containing certain keywords
+                        if category == config["pos_class"]:
+                            subsubdata = _filter_keywords(
+                                subsubdata, exclude=config["exclude"]
+                            )[config["columns"]]
+                            ids = subsubdata[id].values
+                            condition = _get_condition(subdata, name, id, ids, shape_name)
+                            subdata.loc[condition, name] = 1
+            
+                        # Remove POIs within proximity of each other
+                        subsubdata = _filter_pois_within_proximity(
+                            subsubdata,
+                            proximity=config["proximity"],
+                            priority=config["priority"],
                         )[config["columns"]]
                         ids = subsubdata[id].values
                         condition = _get_condition(subdata, name, id, ids, shape_name)
-                        subdata.loc[condition, name] = 1
-        
-                    # Remove POIs within proximity of each other
-                    subsubdata = _filter_pois_within_proximity(
-                        subsubdata,
-                        proximity=config["proximity"],
-                        priority=config["priority"],
-                    )[config["columns"]]
-                    ids = subsubdata[id].values
-                    condition = _get_condition(subdata, name, id, ids, shape_name)
-                    subdata.loc[condition, name] = 2
-        
-                    # Remove POIs with matching names within proximity of each other
-                    subsubdata = _filter_pois_with_matching_names(
-                        subsubdata,
-                        priority=config["priority"],
-                        threshold=config["name_match_threshold"],
-                        proximity=config["name_match_proximity"],
-                    )
-                    ids = subsubdata[id].values
-                    condition = _get_condition(subdata, name, id, ids, shape_name)
-                    subdata.loc[condition, name] = 3
+                        subdata.loc[condition, name] = 2
+            
+                        # Remove POIs with matching names within proximity of each other
+                        subsubdata = _filter_pois_with_matching_names(
+                            subsubdata,
+                            priority=config["priority"],
+                            threshold=config["name_match_threshold"],
+                            proximity=config["name_match_proximity"],
+                        )
+                        ids = subsubdata[id].values
+                        condition = _get_condition(subdata, name, id, ids, shape_name)
+                        subdata.loc[condition, name] = 3
 
-                    # Filter uninhabited locations based on specified buffer size
-                    subsubdata = _filter_uninhabited_locations(
-                        subsubdata,
-                        config,
-                        pbar=pbar
-                    )[config["columns"]]
-                    ids = subsubdata[id].values
-                    condition = _get_condition(subdata, name, id, ids, shape_name)
-                    subdata.loc[condition, name] = 4
-                    
-                # Save cleaned file as a GeoJSON
-                subdata = subdata[config["columns"]+[name]].reset_index(drop=True)
-                out_subdata = data_utils._concat_data([subdata], out_file=out_subfile)
-        
-            # Read and store the cleaned data
-            out_subdata = gpd.read_file(out_subfile).reset_index(drop=True)
-            out_subdata.to_file(out_subfile, driver="GeoJSON")
-            out_data.append(out_subdata)
+                        # Filter uninhabited locations based on specified buffer size
+                        subsubdata = _filter_uninhabited_locations(
+                            subsubdata,
+                            config,
+                            pbar=pbar
+                        )[config["columns"]]
+                        ids = subsubdata[id].values
+                        condition = _get_condition(subdata, name, id, ids, shape_name)
+                        subdata.loc[condition, name] = 4
+                        
+                    # Save cleaned file as a GeoJSON
+                    subdata = subdata[config["columns"]+[name]].reset_index(drop=True)
+                    out_subdata = data_utils._concat_data([subdata], out_file=out_subfile)
+            
+                # Read and store the cleaned data
+                out_subdata = gpd.read_file(out_subfile).reset_index(drop=True)
+                out_subdata.to_file(out_subfile, driver="GeoJSON")
+                out_data.append(out_subdata)
         except:
             print(iso_code)
     

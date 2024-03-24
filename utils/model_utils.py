@@ -281,7 +281,7 @@ def _get_rurban_classification(config, data):
 
     cwd = os.path.dirname(os.getcwd())
     raster_dir = os.path.join(cwd, config["rasters_dir"])
-    ghsl_path = os.path.join(raster_dir, "ghsl", config["ghsl_smod_file"])
+    ghsl_path = os.path.join(raster_dir, "ghsl", config["ghsl_built_c_file"])
     with rio.open(ghsl_path) as src:
         data["ghsl_smod"]  = [x[0] for x in src.sample(coord_list)]
 
