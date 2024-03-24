@@ -142,11 +142,14 @@ def visualize_embeddings(
     # Source: https://betterprogramming.pub/dinov2-the-new-frontier-in-self-supervised-learning-b3a939f6d533
     image_size = config["image_size"]
     imgs_tensor = torch.zeros(batch_size, 3, image_size, image_size)
-    filepaths = data_utils.get_image_filepaths(config, data)
+    filepaths = data_utils.get_image_filepaths(config, data, ext='.jpeg')
     indexes = [random.randint(0, len(data)) for x in range(batch_size)]
     for i, index in enumerate(indexes):
-        image = load_image(filepaths[index], image_size)
-        imgs_tensor[i] = image[:3]
+        try:
+            image = load_image(filepaths[index], image_size)
+            imgs_tensor[i] = image[:3]
+        except:
+            pass
     
     with torch.no_grad():
       features_dict = model.forward_features(imgs_tensor.to(device))
@@ -164,16 +167,19 @@ def visualize_embeddings(
     figsize=(15, 6)
     fig, axes = plt.subplots(2, batch_size, figsize=figsize)
     for i, index in enumerate(indexes):
-        image = np.asarray(Image.open(filepaths[index]))
-        size = int(feature_shape[1])
-        features = pca_features[i*size: (i+1)*size, 0].reshape(
-            int(np.sqrt(size)), int(np.sqrt(size))
-        )
-        axes[0, i].imshow(image)
-        axes[1, i].imshow(features)
-        category = filepaths[index].split('/')[-2]
-        axes[0, i].set_title(category, fontdict={"fontsize": 9})
-        axes[0, i].tick_params(
-            left=False, bottom=False, labelleft=False, labelbottom=False
-        )
+        try:
+            image = np.asarray(Image.open(filepaths[index]))
+            size = int(feature_shape[1])
+            features = pca_features[i*size: (i+1)*size, 0].reshape(
+                int(np.sqrt(size)), int(np.sqrt(size))
+            )
+            axes[0, i].imshow(image)
+            axes[1, i].imshow(features)
+            category = filepaths[index].split('/')[-2]
+            axes[0, i].set_title(category, fontdict={"fontsize": 9})
+            axes[0, i].tick_params(
+                left=False, bottom=False, labelleft=False, labelbottom=False
+            )
+        except:
+            pass
     plt.show()
