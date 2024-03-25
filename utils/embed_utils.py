@@ -18,6 +18,9 @@ from foundation import Foundation
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import random
+
+from pathlib import Path
+
 SEED = 42
 
 device = torch.device('cuda' if torch.cuda.is_available() else "cpu")  
@@ -83,20 +86,25 @@ def load_image(image_file, image_size) -> torch.Tensor:
 
 def compute_embeddings(files, model, image_size):        
     embeddings = []
+    ids = []
     with torch.no_grad():
         pbar = data_utils._create_progress_bar(files)
         for file in pbar:
-            if "dinov2" in model.name:
-                image = load_image(file, image_size).to(device)
-                embedding = model(image)
-                embedding = np.array(embedding[0].cpu().numpy()).reshape(1, -1)[0]
-            elif "esa" in model.name:
-                image = load_image_esa(file, image_size).to(device)
-                _, embedding, _, _ = model(image)
-                embedding = embedding[0, :].cpu().detach().float().numpy().tolist()
-            embeddings.append(embedding)
+            try:
+                if "dinov2" in model.name:
+                    image = load_image(file, image_size).to(device)
+                    embedding = model(image)
+                    embedding = np.array(embedding[0].cpu().numpy()).reshape(1, -1)[0]
+                elif "esa" in model.name:
+                    image = load_image_esa(file, image_size).to(device)
+                    _, embedding, _, _ = model(image)
+                    embedding = embedding[0, :].cpu().detach().float().numpy().tolist()
+                embeddings.append(embedding)
+                ids.append(Path(file).stem)
+            except:
+                pass
             
-    return embeddings
+    return embeddings, ids
 
 
 def get_image_embeddings(
@@ -123,11 +131,13 @@ def get_image_embeddings(
             embeddings = embeddings.set_index(id_col)
         return embeddings
     
-    embeddings = compute_embeddings(files, model, config["image_size"])
-    embeddings = pd.DataFrame(data=embeddings, index=data[id_col])
+    embeddings, ids = compute_embeddings(files, model, config["image_size"])
+    embeddings = pd.DataFrame(data=embeddings, index=ids)
+
+    data2 = data[data['UID'].isin(ids)]
 
     for column in columns:
-        embeddings[column] = data[column].values
+        embeddings[column] = data2[column].values
     embeddings.to_csv(filename)
     
     logging.info(f"Saved to {filename}")

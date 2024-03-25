@@ -138,8 +138,8 @@ def main(c):
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
-    parser.add_argument("--cnn_config", help="Config file")
-    parser.add_argument("--iso", help="ISO code", default=[], nargs='+')
+    parser.add_argument("--cnn_config", help="Config file", default="configs/cnn_configs/resnet18.yaml")
+    parser.add_argument("--iso", help="ISO code", default=["SEN"], nargs='+')
     args = parser.parse_args()
 
     # Load config
@@ -151,7 +151,8 @@ if __name__ == "__main__":
     c["iso_code"] = iso
     log_c = {
         key: val for key, val in c.items() 
-        if ('url' not in key) 
+        if (key is not None) 
+        and ('url' not in key) 
         and ('dir' not in key)
         and ('file' not in key)
     }
