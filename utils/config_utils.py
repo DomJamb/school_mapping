@@ -39,7 +39,7 @@ def load_config(config_file_exp, prefix=""):
         dict: The loaded configuration as a dictionary.
     """
     cwd = os.path.dirname(os.getcwd())
-    sys_config_file = f"{cwd}/configs/config_full.yaml"
+    sys_config_file = f"{cwd}/configs/config.yaml"
     sys_config = create_config(sys_config_file, prefix=prefix)
     config = create_config(config_file_exp, prefix=prefix)
     config['config_name'] = os.path.basename(config_file_exp).split('.')[0]

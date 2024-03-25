@@ -65,6 +65,8 @@ def main(iso, config):
     for rurban in ["urban", "rural"]:
         subresults_dir = os.path.join(results_dir, rurban)
         subtest = test[test.rurban == rurban]
+        if len(subtest) == 0:
+            continue
         results = eval_utils.save_results(subtest, target, pos_class, classes, subresults_dir, rurban)
     
     if len(config["iso_codes"]) > 1:
@@ -95,8 +97,8 @@ def main(iso, config):
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
-    parser.add_argument("--model_config", help="Config file")
-    parser.add_argument("--iso", help="ISO code", default=[], nargs='+')
+    parser.add_argument("--model_config", help="Config file", default="configs/model_configs/dinov2_vits14-LR.yaml")
+    parser.add_argument("--iso", help="ISO code", default=["SEN"], nargs='+')
     args = parser.parse_args()
 
     # Load config
@@ -105,7 +107,8 @@ if __name__ == "__main__":
     c["iso_codes"] = args.iso
     log_c = {
         key: val for key, val in c.items() 
-        if ('url' not in key) 
+        if key is not None
+        and ('url' not in key) 
         and ('dir' not in key)
         and ('file' not in key)
     }
