@@ -1,0 +1,196 @@
+BROJ BBOXEVA ------------------------------------------------------
+
+SCHOOL ------------------------------------------ 
+
+Before cleaning ----------------
+TOTAL : 53539
+
+ATG : 22
+AIA : 1
+YEM : 654
+SEN : 829
+BWA : 158
+MDG : 1894
+BEN : 1346
+BIH : 245
+BLZ : 33
+BRB : 9
+CRI : 416
+DMA : 13
+GHA : 2426
+GIN : 1080
+GRD : 3
+HND : 158
+HUN : 1029
+KAZ : 1054
+KEN : 4862
+KIR : 16
+KNA : 2
+LCA : 41
+MNG : 311
+MSR : 1
+MWI : 648
+NAM : 0
+NER : 1551
+NGA : 2168
+PAN : 160
+RWA : 109
+SLE : 386
+SLV : 346
+SSD : 62
+THA : 5305
+TTO : 273
+UKR : 1289
+UZB : 496
+VCT : 33
+VGB : 1
+ZAF : 1411
+ZWE : 443
+BRA : 22255
+
+After cleaning ----------------
+TOTAL : 47245
+
+ATG : 20
+AIA : 1
+YEM : 609
+SEN : 697
+BWA : 141
+MDG : 1656
+BEN : 1208
+BIH : 229
+BLZ : 28
+BRB : 9
+CRI : 405
+DMA : 13
+GHA : 2171
+GIN : 938
+GRD : 3
+HND : 149
+HUN : 978
+KAZ : 1035
+KEN : 3510
+KIR : 4
+KNA : 1
+LCA : 28
+MNG : 286
+MSR : 1
+MWI : 611
+NAM : 0
+NER : 1375
+NGA : 0
+PAN : 156
+RWA : 94
+SLE : 309
+SLV : 322
+SSD : 54
+THA : 5213
+TTO : 238
+UKR : 1228
+UZB : 473
+VCT : 27
+VGB : 1
+ZAF : 1300
+ZWE : 421
+BRA : 21303
+
+
+NON_SCHOOL ------------------------------------------ 
+
+Before cleaning ----------------
+TOTAL : 437269
+
+ATG : 181
+AIA : 23
+YEM : 7953
+SEN : 5267
+BWA : 905
+MDG : 5962
+BEN : 4459
+BIH : 7228
+BLZ : 1030
+BRB : 292
+CRI : 8820
+DMA : 148
+GHA : 11679
+GIN : 3179
+GRD : 170
+HND : 2683
+HUN : 28849
+KAZ : 16950
+KEN : 13526
+KIR : 76
+KNA : 222
+LCA : 519
+MNG : 5478
+MSR : 17
+MWI : 1330
+NAM : 0
+NER : 2933
+NGA : 13698
+PAN : 3539
+RWA : 1178
+SLE : 1241
+SLV : 3370
+SSD : 587
+THA : 62244
+TTO : 2178
+UKR : 70106
+UZB : 15352
+VCT : 228
+VGB : 72
+ZAF : 14325
+ZWE : 1956
+BRA : 117316
+
+After cleaning ----------------
+TOTAL : 256235
+
+ATG : 110
+AIA : 21
+YEM : 5794
+SEN : 2544
+BWA : 652
+MDG : 2567
+BEN : 2023
+BIH : 4179
+BLZ : 758
+BRB : 194
+CRI : 6123
+DMA : 79
+GHA : 6528
+GIN : 1358
+GRD : 117
+HND : 1600
+HUN : 19153
+KAZ : 12479
+KEN : 6656
+KIR : 7
+KNA : 140
+LCA : 323
+MNG : 3112
+MSR : 12
+MWI : 985
+NAM : 0
+NER : 1375
+NGA : 0
+PAN : 1980
+RWA : 828
+SLE : 608
+SLV : 1670
+SSD : 484
+THA : 38320
+TTO : 1097
+UKR : 44797
+UZB : 11119
+VCT : 70
+VGB : 55
+ZAF : 9397
+ZWE : 1615
+BRA : 65306
+
+
+KONACNI BROJ USPJESNO SKINUTIH (OSM) SLIKA -------------------------------------------------------
+
+SCHOOL: 33907
+NON_SCHOOL: 224885
