@@ -113,11 +113,12 @@ def download_sat_images(
     #             #logging.info(e)
     #             pass
 
-    dest_dir = 'satellite_imgs'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images'
 
     tasks = []
     for index in range(len(data)):
-        image_file = f"../{dest_dir}/{data[id_col][index]}.jpeg"
+        #image_file = f"../{dest_dir}/{data[id_col][index]}.jpeg"
+        image_file = f"{dest_dir}/{category}/{data[id_col][index]}.jpeg"
         bbox = (
                      data.lon[index] - config["size"],
                      data.lat[index] - config["size"],
@@ -180,12 +181,30 @@ def main():
 
     # Download satellite images
 
-    vectors_dir = config["vectors_dir"]
-    filename = "clean.geojson"
-    filename = os.path.join(cwd, vectors_dir, "non_school", filename)
-    data = gpd.read_file(filename).reset_index(drop=True)
+    # vectors_dir = config["vectors_dir"]
+    # filename = "clean.geojson"
+    # filename = os.path.join(cwd, vectors_dir, "non_school", filename)
+    # data = gpd.read_file(filename).reset_index(drop=True)
 
-    download_sat_images(creds, config, iso="KAZ", category=args.category, filename=args.filename, data=data)
+    iso_codes = [
+        'ATG', 'AIA', 'YEM', 'SEN', 'BWA', 'MDG', 'BEN', 'BIH', 'BLZ', 'BRB', 
+        'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
+        'KNA', 'LCA', 'MNG', 'MSR', 'MWI', 'NAM', 'NER', 'NGA', 'PAN', 'RWA', 
+        'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
+        'ZWE', 'BRA'
+    ]
+    for iso_code in iso_codes:
+        try:
+            download_sat_images(creds, config, iso=iso_code, category="school")
+        except:
+            print(f"error with iso code {iso_code}")
+
+    for iso_code in iso_codes:
+        try:
+            download_sat_images(creds, config, iso=iso_code, category="non_school")
+        except:
+            print(f"error with iso code {iso_code}")
+    
 
 
 if __name__ == "__main__":
