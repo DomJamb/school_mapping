@@ -23,10 +23,16 @@ def get_image_filepaths(config, data, in_dir=None, ext=".jpeg"):
     for index, row in data.iterrows():
         file = f"{row['UID']}{ext}"
         if not in_dir:
-            filepath = os.path.join(
-                cwd, 
-                config["rasters_dir"], 
-                config["maxar_dir"], 
+            # filepath = os.path.join(
+            #     cwd, 
+            #     config["rasters_dir"], 
+            #     config["maxar_dir"], 
+            #     row["iso"], 
+            #     row["class"],
+            #     file 
+            # )
+            filepath = os.path.join( 
+                config["images_dir"], 
                 row["iso"], 
                 row["class"],
                 file 

@@ -23,14 +23,14 @@ from pathlib import Path
 
 SEED = 42
 
-device = torch.device('cuda' if torch.cuda.is_available() else "cpu")  
+device = torch.device('cuda:1' if torch.cuda.is_available() else "cpu")  
 cwd = os.path.dirname(os.getcwd())
 
 def load_model(config):    
     if "dinov2" in config["embed_model"]:
         model = torch.hub.load("facebookresearch/dinov2", config["embed_model"])
         model.name = config["embed_model"]
-        device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+        device = torch.device('cuda:1' if torch.cuda.is_available() else "cpu")
         model.eval()
         model.to(device)
         
@@ -50,10 +50,10 @@ def load_model(config):
             activation=nn.ReLU6(),
         )
         model.name = config["embed_model"]
-        device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+        device = torch.device('cuda:1' if torch.cuda.is_available() else "cpu")
         model.load_state_dict(torch.load(model_file, map_location=device), strict=False)
         if torch.cuda.is_available():
-            model.cuda()
+            model.to(device=device)
         model.eval()
     return model
 
@@ -138,7 +138,7 @@ def get_image_embeddings(
 
     for column in columns:
         embeddings[column] = data2[column].values
-    embeddings.to_csv(filename)
+    embeddings.to_csv(filename, index=False)
     
     logging.info(f"Saved to {filename}")
     return embeddings
