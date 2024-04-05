@@ -65,7 +65,7 @@ def save_results(test, target, pos_class, classes, results_dir, prefix=None, log
         results = {f"{prefix}_{key}": val for key, val in results.items()}
     if log: 
         logging.info(results)
-        wandb.log(results)
+        #wandb.log(results)
     return results
 
 

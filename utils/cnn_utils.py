@@ -133,6 +133,11 @@ def visualize_data(data, data_loader, phase="test", n=4):
             axes[i, j].axis("off")
 
 
+def remove_data_without_images(dataset):
+    mask = dataset["filepath"].apply(lambda filepath: os.path.exists(filepath))
+    filtered_dataset = dataset[mask]
+    return filtered_dataset
+
 def load_dataset(config, phases):
     """
     Load dataset based on configuration settings and phases.
@@ -151,6 +156,10 @@ def load_dataset(config, phases):
     
     dataset = model_utils.load_data(config, attributes=["rurban", "iso"], verbose=True)
     dataset["filepath"] = data_utils.get_image_filepaths(config, dataset)
+
+    # Remove data entries which do not have a corresponding sattelite image file
+    dataset = remove_data_without_images(dataset)
+
     classes_dict = {config["pos_class"] : 1, config["neg_class"]: 0}
 
     transforms = get_transforms(size=config["img_size"])
@@ -228,8 +237,8 @@ def train(data_loader, model, criterion, optimizer, device, logging, pos_label, 
     learning_rate = optimizer.param_groups[0]["lr"]
     logging.info(f"Train Loss: {epoch_loss} {epoch_results} LR: {learning_rate}")
 
-    if wandb is not None:
-        wandb.log({"train_" + k: v for k, v in epoch_results.items()})
+    #if wandb is not None:
+        #wandb.log({"train_" + k: v for k, v in epoch_results.items()})
     return epoch_results
 
 
@@ -291,8 +300,8 @@ def evaluate(data_loader, class_names, model, criterion, device, logging, pos_la
         'y_probs': y_probs
     })
 
-    if wandb is not None:
-        wandb.log({"val_" + k: v for k, v in epoch_results.items()})
+    #if wandb is not None:
+        #wandb.log({"val_" + k: v for k, v in epoch_results.items()})
     return epoch_results, (confusion_matrix, cm_metrics, cm_report), preds
 
 

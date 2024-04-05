@@ -18,7 +18,7 @@ cwd = os.path.dirname(os.getcwd())
 
 def main(iso, config):
     exp_name = f"{iso}-{config['config_name']}"
-    wandb.run.name = exp_name
+    #wandb.run.name = exp_name
     results_dir = os.path.join(cwd, config["exp_dir"], exp_name)
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
@@ -29,7 +29,7 @@ def main(iso, config):
 
     out_dir = os.path.join(config["vectors_dir"], "embeddings")
     embeddings = embed_utils.get_image_embeddings(
-        config, data, model, out_dir, in_dir=None, columns=columns
+        config, data, model, out_dir, in_dir=None, columns=columns, name="test_all"
     )
     embeddings.columns = [str(x) for x in embeddings.columns]
     
@@ -71,56 +71,86 @@ def main(iso, config):
     
     if len(config["iso_codes"]) > 1:
         for iso_code in config["iso_codes"]:
-            subresults_dir = os.path.join(results_dir, iso_code)
-            subtest = test[test.iso == iso_code]
-            results = eval_utils.save_results(
-                subtest, 
-                target, 
-                pos_class, 
-                classes, 
-                subresults_dir, 
-                iso_code
-            )
-            for rurban in ["urban", "rural"]:
-                subsubresults_dir = os.path.join(subresults_dir, rurban)
-                subsubtest = subtest[subtest.rurban == rurban]
+            try:
+                subresults_dir = os.path.join(results_dir, iso_code)
+                subtest = test[test.iso == iso_code]
+                if len(subtest) == 0:
+                    continue
                 results = eval_utils.save_results(
-                    subsubtest, 
+                    subtest, 
                     target, 
                     pos_class, 
                     classes, 
-                    subsubresults_dir, 
-                    f"{iso_code}_{rurban}"
+                    subresults_dir, 
+                    iso_code
                 )
+                for rurban in ["urban", "rural"]:
+                    subsubresults_dir = os.path.join(subresults_dir, rurban)
+                    subsubtest = subtest[subtest.rurban == rurban]
+                    if len(subsubtest) == 0:
+                        continue
+                    results = eval_utils.save_results(
+                        subsubtest, 
+                        target, 
+                        pos_class, 
+                        classes, 
+                        subsubresults_dir, 
+                        f"{iso_code}_{rurban}"
+                    )
+            except:
+                print(f"error with code{iso_code}")
             
             
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
-    parser.add_argument("--model_config", help="Config file", default="configs/model_configs/dinov2_vits14-LR.yaml")
-    parser.add_argument("--iso", help="ISO code", default=["SEN"], nargs='+')
+    parser.add_argument("--model_config", help="Config file", default="configs/model_configs/dinov2_vitb14-LR.yaml")
+    parser.add_argument("--iso", help="ISO code", default=[
+        'ATG', 'AIA', 'YEM', 'SEN', 'BWA', 'MDG', 'BEN', 'BIH', 'BLZ', 'BRB', 
+        'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
+        'KNA', 'LCA', 'MNG', 'MSR', 'MWI', 'NAM', 'NER', 'NGA', 'PAN', 'RWA', 
+        'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
+        'ZWE', 'BRA'
+    ], nargs='+')
     args = parser.parse_args()
 
     # Load config
-    config_file = os.path.join(cwd, args.model_config)
-    c = config_utils.load_config(config_file)
-    c["iso_codes"] = args.iso
-    log_c = {
-        key: val for key, val in c.items() 
-        if key is not None
-        and ('url' not in key) 
-        and ('dir' not in key)
-        and ('file' not in key)
-    }
-    iso = args.iso[0]
-    if "name" in c: iso = c["name"]
-    log_c["iso_code"] = iso
-    logging.info(log_c)
     
-    wandb.init(
-        project="UNICEFv1",
-        config=log_c,
-        tags=[c["embed_model"], c["model"]]
-    )
+    # log_c = {
+    #     key: val for key, val in c.items() 
+    #     if key is not None
+    #     and ('url' not in key) 
+    #     and ('dir' not in key)
+    #     and ('file' not in key)
+    # }
+    iso = args.iso[0]
+    # log_c["iso_code"] = iso
+    # logging.info(log_c)
+    
+    # wandb.init(
+    #     project="UNICEFv1",
+    #     config=log_c,
+    #     tags=[c["embed_model"], c["model"]]
+    # )
 
-    main(iso, c)
+
+    configs = [
+        "configs/model_configs/dinov2_vitl14-LR.yaml",
+        #"configs/model_configs/dinov2_vits14-SVC.yaml",
+        #"configs/model_configs/dinov2_vitb14-SVC.yaml",
+        #"configs/model_configs/dinov2_vitl14-SVC.yaml",
+        #"configs/model_configs/esa_foundation_v1-LR.yaml",
+        #"configs/model_configs/esa_foundation_v2-LR.yaml",
+        #"configs/model_configs/esa_foundation-LR.yaml",
+    ]
+
+    for config in configs:
+        try:
+            config_file = os.path.join(cwd, config)
+            c = config_utils.load_config(config_file)
+            c["iso_codes"] = args.iso
+            main(iso, c)
+        except:
+            pass
+
+    

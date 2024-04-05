@@ -14,13 +14,15 @@ import logging
 
 # Get device
 cwd = os.path.dirname(os.getcwd())
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 logging.info(f"Device: {device}")
 
+SEED = 42
 
 def main(c):    
     # Create experiment folder
-    exp_name = f"{c['iso_code']}_{c['config_name']}"
+    #exp_name = f"{c['iso_code']}_{c['config_name']}"
+    exp_name = f"all_{c['config_name']}"
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
     if not os.path.exists(exp_dir):
         os.makedirs(exp_dir)
@@ -34,9 +36,9 @@ def main(c):
     logging.info(exp_name)
 
     # Set wandb configs
-    wandb.init(project="UNICEFv2", config=c)
-    wandb.run.name = exp_name
-    wandb.config = c
+    #wandb.init(project="UNICEFv2", config=c)
+    #wandb.run.name = exp_name
+    #wandb.config = c
     
     # Load dataset
     phases = ["train", "test"]
@@ -62,7 +64,7 @@ def main(c):
     logging.info(model)
 
     # Instantiate wandb tracker
-    wandb.watch(model)
+    #wandb.watch(model)
 
     # Commence model training
     n_epochs = c["n_epochs"]
@@ -135,11 +137,87 @@ def main(c):
     eval_utils._save_files(test_results, test_cm, exp_dir)
 
 
+def test(config):
+
+    exp_name = f"all_{config['config_name']}"
+    exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
+
+    phases = ["train", "test"]
+    data, data_loader, classes = cnn_utils.load_dataset(config=c, phases=phases)
+
+    model, criterion, optimizer, scheduler = cnn_utils.load_model(
+        n_classes=len(classes),
+        model_type=c["model"],
+        pretrained=c["pretrained"],
+        scheduler_type=c["scheduler"],
+        optimizer_type=c["optimizer"],
+        label_smoothing=c["label_smoothing"],
+        lr=c["lr"],
+        momentum=c["momentum"],
+        gamma=c["gamma"],
+        step_size=c["step_size"],
+        patience=c["patience"],
+        dropout=c["dropout"],
+        device=device,
+    )
+
+    model_file = os.path.join(exp_dir, f"{exp_name}.pth")
+    model.load_state_dict(torch.load(model_file, map_location=device))
+    model = model.to(device)
+
+    for iso_code in config["iso_codes"]:
+        try:
+            subresults_dir = os.path.join(exp_dir, iso_code)
+
+            #print(data["test"].dataset.columns)
+            subdata = data["test"].dataset[data["test"].dataset.iso == iso_code]
+            #print(f"{iso_code}: {len(subdata)}")
+
+            classes_dict = {config["pos_class"] : 1, config["neg_class"]: 0}
+            transforms = cnn_utils.get_transforms(size=config["img_size"])
+            dataset =  cnn_utils.SchoolDataset(
+                    subdata
+                    .sample(frac=1, random_state=SEED)
+                    .reset_index(drop=True),
+                    classes_dict,
+                    transforms["test"]
+            )
+
+
+            data_loader =  torch.utils.data.DataLoader(
+                    dataset,
+                    batch_size=config["batch_size"],
+                    num_workers=config["n_workers"],
+                    shuffle=True,
+                    drop_last=True
+            )
+
+            if len(data_loader) == 0:
+                continue
+
+            if not os.path.exists(subresults_dir):
+                os.makedirs(subresults_dir)
+            test_results, test_cm, test_preds = cnn_utils.evaluate(
+                data_loader, classes, model, criterion, device, pos_label=1, wandb=wandb, logging=logging
+            )
+            test_preds.to_csv(os.path.join(subresults_dir, f"{iso_code}.csv"), index=False)
+
+            # Save results in experiment directory
+            eval_utils._save_files(test_results, test_cm, subresults_dir)
+        except:
+            print(f"error with code{iso_code}")
+
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
-    parser.add_argument("--cnn_config", help="Config file", default="configs/cnn_configs/resnet18.yaml")
-    parser.add_argument("--iso", help="ISO code", default=["SEN"], nargs='+')
+    parser.add_argument("--cnn_config", help="Config file", default="configs/cnn_configs/resnet50.yaml")
+    parser.add_argument("--iso", help="ISO code", default=[
+        'ATG', 'AIA', 'YEM', 'SEN', 'BWA', 'MDG', 'BEN', 'BIH', 'BLZ', 'BRB', 
+        'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
+        'KNA', 'LCA', 'MNG', 'MSR', 'MWI', 'NAM', 'NER', 'NGA', 'PAN', 'RWA', 
+        'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
+        'ZWE', 'BRA'
+    ], nargs='+')
     args = parser.parse_args()
 
     # Load config
@@ -159,3 +237,4 @@ if __name__ == "__main__":
     logging.info(log_c)
 
     main(c)
+    #test(c)

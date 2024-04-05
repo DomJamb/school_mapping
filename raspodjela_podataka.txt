@@ -1,0 +1,299 @@
+                        count
+iso dataset class
+AIA test    non_school      3
+            school          1
+    train   non_school     18
+ATG test    non_school     21
+            school          5
+    train   non_school     89
+            school         15
+BEN test    non_school    387
+            school        259
+    train   non_school   1636
+            school        949
+BIH test    non_school    828
+            school         53
+    train   non_school   3351
+            school        176
+BLZ test    non_school    153
+            school          4
+    train   non_school    605
+            school         24
+BRA test    non_school  13138
+            school       4183
+    train   non_school  52168
+            school      17120
+BRB test    non_school     40
+    train   non_school    154
+            school          9
+BWA test    non_school    128
+            school         30
+    train   non_school    524
+            school        111
+CRI test    non_school   1207
+            school         98
+    train   non_school   4916
+            school        307
+DMA test    non_school     14
+            school          4
+    train   non_school     65
+            school          9
+GHA test    non_school   1285
+            school        454
+    train   non_school   5243
+            school       1717
+GIN test    non_school    273
+            school        186
+    train   non_school   1085
+            school        752
+GRD test    non_school     23
+            school          1
+    train   non_school     94
+            school          2
+HND test    non_school    324
+            school         25
+    train   non_school   1276
+            school        124
+HUN test    non_school   3858
+            school        168
+    train   non_school  15295
+            school        810
+KAZ test    non_school   2481
+            school        221
+    train   non_school   9998
+            school        814
+KEN test    non_school   1308
+            school        725
+    train   non_school   5348
+            school       2785
+KIR test    non_school      1
+            school          1
+    train   non_school      6
+            school          3
+KNA test    non_school     28
+    train   non_school    112
+            school          1
+LCA test    non_school     65
+            school          5
+    train   non_school    258
+            school         23
+MDG test    non_school    478
+            school        366
+    train   non_school   2089
+            school       1290
+MNG test    non_school    608
+            school         71
+    train   non_school   2504
+            school        215
+MSR test    non_school      2
+    train   non_school     10
+            school          1
+MWI test    non_school    185
+            school        134
+    train   non_school    800
+            school        477
+NER test    non_school    267
+            school        283
+    train   non_school   1108
+            school       1092
+PAN test    non_school    399
+            school         28
+    train   non_school   1581
+            school        128
+RWA test    non_school    163
+            school         21
+    train   non_school    665
+            school         73
+SEN test    non_school    480
+            school        168
+    train   non_school   2064
+            school        529
+SLE test    non_school    123
+            school         60
+    train   non_school    485
+            school        249
+SLV test    non_school    335
+            school         63
+    train   non_school   1335
+            school        259
+SSD test    non_school     94
+            school         13
+    train   non_school    390
+            school         41
+THA test    non_school   7632
+            school       1074
+    train   non_school  30688
+            school       4139
+TTO test    non_school    224
+            school         43
+    train   non_school    873
+            school        195
+UKR test    non_school   8951
+            school        254
+    train   non_school  35846
+            school        974
+UZB test    non_school   2211
+            school        107
+    train   non_school   8908
+            school        366
+VCT test    non_school     12
+            school          7
+    train   non_school     58
+            school         20
+VGB test    non_school     10
+            school          1
+    train   non_school     45
+YEM test    non_school   1133
+            school        147
+    train   non_school   4661
+            school        462
+ZAF test    non_school   1878
+            school        261
+    train   non_school   7519
+            school       1039
+ZWE test    non_school    319
+            school         88
+    train   non_school   1296
+            school        333
+
+
+
+             count
+iso dataset
+AIA test         4
+    train       18
+ATG test        26
+    train      104
+BEN test       646
+    train     2585
+BIH test       881
+    train     3527
+BLZ test       157
+    train      629
+BRA test     17321
+    train    69288
+BRB test        40
+    train      163
+BWA test       158
+    train      635
+CRI test      1305
+    train     5223
+DMA test        18
+    train       74
+GHA test      1739
+    train     6960
+GIN test       459
+    train     1837
+GRD test        24
+    train       96
+HND test       349
+    train     1400
+HUN test      4026
+    train    16105
+KAZ test      2702
+    train    10812
+KEN test      2033
+    train     8133
+KIR test         2
+    train        9
+KNA test        28
+    train      113
+LCA test        70
+    train      281
+MDG test       844
+    train     3379
+MNG test       679
+    train     2719
+MSR test         2
+    train       11
+MWI test       319
+    train     1277
+NER test       550
+    train     2200
+PAN test       427
+    train     1709
+RWA test       184
+    train      738
+SEN test       648
+    train     2593
+SLE test       183
+    train      734
+SLV test       398
+    train     1594
+SSD test       107
+    train      431
+THA test      8706
+    train    34827
+TTO test       267
+    train     1068
+UKR test      9205
+    train    36820
+UZB test      2318
+    train     9274
+VCT test        19
+    train       78
+VGB test        11
+    train       45
+YEM test      1280
+    train     5123
+ZAF test      2139
+    train     8558
+ZWE test       407
+    train     1629
+
+
+                     count
+dataset class
+test    non_school   51069
+        school        9612
+train   non_school  205166
+        school       37633
+
+dataset
+train    242799
+test      60681
+
+rurban
+urban    303480
+
+iso
+BRA    86609
+UKR    46025
+THA    43533
+HUN    20131
+KAZ    13514
+UZB    11592
+ZAF    10697
+KEN    10166
+GHA     8699
+CRI     6528
+YEM     6403
+BIH     4408
+MDG     4223
+MNG     3398
+SEN     3241
+BEN     3231
+NER     2750
+GIN     2296
+PAN     2136
+ZWE     2036
+SLV     1992
+HND     1749
+MWI     1596
+TTO     1335
+RWA      922
+SLE      917
+BWA      793
+BLZ      786
+SSD      538
+LCA      351
+BRB      203
+KNA      141
+ATG      130
+GRD      120
+VCT       97
+DMA       92
+VGB       56
+AIA       22
+MSR       13
+KIR       11
