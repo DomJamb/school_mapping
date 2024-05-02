@@ -19,10 +19,10 @@ logging.info(f"Device: {device}")
 
 SEED = 42
 
-def main(c):    
+def main(c, exp_name="all"):    
     # Create experiment folder
     #exp_name = f"{c['iso_code']}_{c['config_name']}"
-    exp_name = f"all_{c['config_name']}"
+    exp_name = f"{exp_name}_{c['config_name']}"
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
     if not os.path.exists(exp_dir):
         os.makedirs(exp_dir)
@@ -137,9 +137,9 @@ def main(c):
     eval_utils._save_files(test_results, test_cm, exp_dir)
 
 
-def test(config):
+def test(config, exp_name="all"):
 
-    exp_name = f"all_{config['config_name']}"
+    exp_name = f"{exp_name}_{config['config_name']}"
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
 
     phases = ["train", "test"]
@@ -210,7 +210,7 @@ def test(config):
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
-    parser.add_argument("--cnn_config", help="Config file", default="configs/cnn_configs/resnet50.yaml")
+    parser.add_argument("--cnn_config", help="Config file", default="configs/cnn_configs/resnet18.yaml")
     parser.add_argument("--iso", help="ISO code", default=[
         'ATG', 'AIA', 'YEM', 'SEN', 'BWA', 'MDG', 'BEN', 'BIH', 'BLZ', 'BRB', 
         'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
@@ -218,13 +218,28 @@ if __name__ == "__main__":
         'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
         'ZWE', 'BRA'
     ], nargs='+')
+    parser.add_argument('-d', "--device", help="device", default="cuda:1")
+    parser.add_argument("--test", action='store_true')
+    parser.add_argument('-e', "--exp_name", default="all")
     args = parser.parse_args()
+
+    device = torch.device(args.device)
+    logging.info(f"config: {args.cnn_config}")
+    logging.info(f"Args Device: {device}")
+    logging.info(f"test: {args.test}")
+    logging.info(f"exp_name: {args.exp_name}")
 
     # Load config
     config_file = os.path.join(cwd, args.cnn_config)
     c = config_utils.load_config(config_file)
-    c["iso_codes"] = args.iso
-    iso = args.iso[0]
+    iso_codes = [
+        "THA", 'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
+    ]
+    c["iso_codes"] = iso_codes
+    iso = iso_codes[0]
+
+    
+
     if "name" in c: iso = c["name"]
     c["iso_code"] = iso
     log_c = {
@@ -234,7 +249,10 @@ if __name__ == "__main__":
         and ('dir' not in key)
         and ('file' not in key)
     }
-    logging.info(log_c)
+    #logging.info(log_c)
 
-    main(c)
-    #test(c)
+    test_flag = args.test
+    if test_flag:
+        test(c, args.exp_name)
+    else:
+        main(c, args.exp_name)

@@ -126,7 +126,8 @@ def get_cv(c):
         "GridSearchCV",
     ]
 
-    scoring = eval_utils.get_scoring(c["pos_class"])
+    #scoring = eval_utils.get_scoring(c["pos_class"])
+    scoring = eval_utils.get_scoring(1)
     if cv == "RandomizedSearchCV":
         return RandomizedSearchCV(
             pipe, params, scoring=scoring, random_state=SEED, **cv_params
@@ -157,7 +158,7 @@ def model_trainer(c, data, features, target):
 
     cv = get_cv(c)
     logging.info(cv)
-    cv.fit(X[:50000], y[:50000])
+    cv.fit(X[:10000], y[:10000])
     #cv.fit(X, y)
 
     logging.info("Best estimator: {}".format(cv.best_estimator_))
@@ -169,13 +170,15 @@ def load_data(
     attributes=["rurban"],
     in_dir="clean", 
     out_dir="train",
+    name = None,
     verbose=True
 ):
     cwd = os.path.dirname(os.getcwd())
     vector_dir = os.path.join(cwd, config["vectors_dir"])
     iso_codes = config["iso_codes"]
-    name = iso_codes[0] 
-    if "name" in config:
+    if name is None:
+        name = iso_codes[0] 
+    if "name" in config and name is None:
         name = config["name"] if config["name"] else name
     test_size = config["test_size"]
 

@@ -47,6 +47,10 @@ def main(iso, config):
     logging.info(f"Classes: {classes}")
 
     logging.info("Training model...")
+    classes = [0, 1]
+    class_map = {'school': 1, 'non_school': 0}
+    train[target] = train[target].map(class_map)
+    test[target] = test[target].map(class_map)
     cv = model_utils.model_trainer(c, train, features, target)
     logging.info(f"Best estimator: {cv.best_estimator_}")
     logging.info(f"Best CV score: {cv.best_score_}")
@@ -59,7 +63,8 @@ def main(iso, config):
     joblib.dump(model, model_file)
 
     test["pred"] = preds
-    pos_class = config["pos_class"]
+    #pos_class = config["pos_class"]
+    pos_class = 1
     results = eval_utils.save_results(test, target, pos_class, classes, results_dir)
 
     for rurban in ["urban", "rural"]:
@@ -74,6 +79,54 @@ def main(iso, config):
             try:
                 subresults_dir = os.path.join(results_dir, iso_code)
                 subtest = test[test.iso == iso_code]
+                if len(subtest) == 0:
+                    continue
+                results = eval_utils.save_results(
+                    subtest, 
+                    target, 
+                    pos_class, 
+                    classes, 
+                    subresults_dir, 
+                    iso_code
+                )
+                for rurban in ["urban", "rural"]:
+                    subsubresults_dir = os.path.join(subresults_dir, rurban)
+                    subsubtest = subtest[subtest.rurban == rurban]
+                    if len(subsubtest) == 0:
+                        continue
+                    results = eval_utils.save_results(
+                        subsubtest, 
+                        target, 
+                        pos_class, 
+                        classes, 
+                        subsubresults_dir, 
+                        f"{iso_code}_{rurban}"
+                    )
+            except:
+                print(f"error with code{iso_code}")
+
+    print()
+    print("TRAIN")
+    print()
+    preds = model.predict(train[features])
+    train["pred"] = preds
+    #pos_class = config["pos_class"]
+    pos_class = 1
+    results_dir_train = os.path.join(cwd, config["exp_dir"], exp_name, "train")
+    results = eval_utils.save_results(train, target, pos_class, classes, results_dir_train)
+
+    for rurban in ["urban", "rural"]:
+        subresults_dir = os.path.join(results_dir_train, rurban)
+        subtest = train[train.rurban == rurban]
+        if len(subtest) == 0:
+            continue
+        results = eval_utils.save_results(subtest, target, pos_class, classes, subresults_dir, rurban)
+    
+    if len(config["iso_codes"]) > 1:
+        for iso_code in config["iso_codes"]:
+            try:
+                subresults_dir = os.path.join(results_dir_train, iso_code)
+                subtest = train[train.iso == iso_code]
                 if len(subtest) == 0:
                     continue
                 results = eval_utils.save_results(
@@ -135,7 +188,8 @@ if __name__ == "__main__":
 
 
     configs = [
-        "configs/model_configs/dinov2_vitl14-LR.yaml",
+        "configs/model_configs/dinov2_vitl14-xgboost.yaml",
+        #"configs/model_configs/dinov2_vitl14-LR.yaml",
         #"configs/model_configs/dinov2_vits14-SVC.yaml",
         #"configs/model_configs/dinov2_vitb14-SVC.yaml",
         #"configs/model_configs/dinov2_vitl14-SVC.yaml",
@@ -145,12 +199,12 @@ if __name__ == "__main__":
     ]
 
     for config in configs:
-        try:
+        #try:
             config_file = os.path.join(cwd, config)
             c = config_utils.load_config(config_file)
             c["iso_codes"] = args.iso
             main(iso, c)
-        except:
-            pass
+        # except:
+        #     pass
 
     

@@ -138,7 +138,7 @@ def remove_data_without_images(dataset):
     filtered_dataset = dataset[mask]
     return filtered_dataset
 
-def load_dataset(config, phases):
+def load_dataset(config, phases, name=None):
     """
     Load dataset based on configuration settings and phases.
 
@@ -154,7 +154,7 @@ def load_dataset(config, phases):
         - dict: A dictionary containing classes and their mappings.
     """
     
-    dataset = model_utils.load_data(config, attributes=["rurban", "iso"], verbose=True)
+    dataset = model_utils.load_data(config, attributes=["rurban", "iso"], verbose=True, name=name)
     dataset["filepath"] = data_utils.get_image_filepaths(config, dataset)
 
     # Remove data entries which do not have a corresponding sattelite image file
@@ -329,6 +329,7 @@ def get_transforms(size):
         ),
         "test": transforms.Compose(
             [
+                
                 transforms.Resize(size),
                 transforms.CenterCrop(size),
                 transforms.ToTensor(),

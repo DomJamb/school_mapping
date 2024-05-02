@@ -95,7 +95,7 @@ def get_confusion_matrix(y_true, y_pred, class_names):
 
     cm_metrics = _get_cm_metrics(cm, list(cm.columns))
     cm_report = classification_report(
-        y_true, y_pred, target_names=class_names, zero_division=0
+        y_true, y_pred, target_names=[str(c) for c in class_names], zero_division=0
     )
 
     return cm, cm_metrics, cm_report

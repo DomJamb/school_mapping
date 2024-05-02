@@ -117,13 +117,13 @@ def download_sat_images(
     tasks = []
     for index in range(len(data)):
         #image_file = f"../{dest_dir}/{data[id_col][index]}.jpeg"
-        image_file = f"{dest_dir}/{category}/{data[id_col][index]}.jpeg"
+        image_file = f"{dest_dir}/{iso}/{category}/{data[id_col][index]}.jpeg"
         bbox = (
                      data.lon[index] - config["size"],
                      data.lat[index] - config["size"],
                      data.lon[index] + config["size"],
                      data.lat[index] + config["size"],
-                 ) 
+                ) 
         tasks.append((image_file, bbox))
 
     task_queue = Queue()
@@ -156,8 +156,8 @@ def download_sat_images(
 
     end = time.time()
 
-    print('Total time for 1000 images:', end - start)
-    print('Time per image:', (end - start) / 1000)
+    print(f'Total time for {len(tasks)} images:', end - start)
+    print('Time per image:', (end - start) / len(tasks))
 
 
 
@@ -190,8 +190,11 @@ def main():
         'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
         'KNA', 'LCA', 'MNG', 'MSR', 'MWI', 'NAM', 'NER', 'NGA', 'PAN', 'RWA', 
         'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
-        'ZWE', 'BRA'
+        'ZWE', 'BRA',
+
+        'VNM', 'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
     ]
+    #iso_codes = [ "ATG" ]
     for iso_code in iso_codes:
         try:
             download_sat_images(creds, config, iso=iso_code, category="school")
@@ -201,8 +204,8 @@ def main():
     for iso_code in iso_codes:
         try:
             download_sat_images(creds, config, iso=iso_code, category="non_school")
-        except:
-            print(f"error with iso code {iso_code}")
+        except Exception as e:
+            print(f"error with iso code {iso_code}: {e}")
     
 
 

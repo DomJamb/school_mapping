@@ -1,9 +1,9 @@
 test_size: 0.2
-batch_size: 32
+batch_size: 48
 n_workers: 4
-n_epochs: 60
+n_epochs: 30
 
-model: "convnext_small"
+model: "convnext_large"
 pretrained: True
 scheduler: "ReduceLROnPlateau"
 optimizer: "Adam"
