@@ -34,6 +34,7 @@ if __name__ == "__main__":
         img_path = f"satellite_images/{data_train['iso'][ind]}/{data_train['class'][ind]}/{data_train['UID'][ind]}.jpeg"
 
         if not os.path.exists(os.path.join(sm_dir, img_path)):
+            continue
             img_path = f"satellite_images/{data_train['iso'][ind]}/{data_train['class'][ind]}/lowres/{data_train['UID'][ind]}.jpeg"
 
         train_file.write(f"{img_path}\n")
@@ -42,6 +43,7 @@ if __name__ == "__main__":
         img_path = f"satellite_images/{data_test['iso'][ind]}/{data_test['class'][ind]}/{data_test['UID'][ind]}.jpeg"
 
         if not os.path.exists(os.path.join(sm_dir, img_path)):
+            continue
             img_path = f"satellite_images/{data_test['iso'][ind]}/{data_test['class'][ind]}/lowres/{data_test['UID'][ind]}.jpeg"
 
         val_file.write(f"{img_path}\n")

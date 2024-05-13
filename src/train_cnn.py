@@ -19,7 +19,7 @@ logging.info(f"Device: {device}")
 
 SEED = 42
 
-def main(c, exp_name="all"):    
+def main(c, exp_name="all", dataset_name=None):    
     # Create experiment folder
     #exp_name = f"{c['iso_code']}_{c['config_name']}"
     exp_name = f"{exp_name}_{c['config_name']}"
@@ -42,7 +42,7 @@ def main(c, exp_name="all"):
     
     # Load dataset
     phases = ["train", "test"]
-    data, data_loader, classes = cnn_utils.load_dataset(config=c, phases=phases)
+    data, data_loader, classes = cnn_utils.load_dataset(config=c, phases=phases, name = dataset_name)
     logging.info(f"Train/test sizes: {len(data['train'])}/{len(data['test'])}")
 
     # Load model, optimizer, and scheduler
@@ -137,13 +137,13 @@ def main(c, exp_name="all"):
     eval_utils._save_files(test_results, test_cm, exp_dir)
 
 
-def test(config, exp_name="all"):
+def test(config, exp_name="all", dataset_name=None):
 
     exp_name = f"{exp_name}_{config['config_name']}"
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
 
     phases = ["train", "test"]
-    data, data_loader, classes = cnn_utils.load_dataset(config=c, phases=phases)
+    data, data_loader, classes = cnn_utils.load_dataset(config=c, phases=phases, name = dataset_name)
 
     model, criterion, optimizer, scheduler = cnn_utils.load_model(
         n_classes=len(classes),
@@ -218,9 +218,10 @@ if __name__ == "__main__":
         'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
         'ZWE', 'BRA'
     ], nargs='+')
-    parser.add_argument('-d', "--device", help="device", default="cuda:1")
+    parser.add_argument("--device", help="device", default="cuda:1")
     parser.add_argument("--test", action='store_true')
     parser.add_argument('-e', "--exp_name", default="all")
+    parser.add_argument('--dataset', default="all")
     args = parser.parse_args()
 
     device = torch.device(args.device)
@@ -228,12 +229,26 @@ if __name__ == "__main__":
     logging.info(f"Args Device: {device}")
     logging.info(f"test: {args.test}")
     logging.info(f"exp_name: {args.exp_name}")
+    logging.info(f"dataset: {args.dataset}")
 
     # Load config
     config_file = os.path.join(cwd, args.cnn_config)
     c = config_utils.load_config(config_file)
+    iso_codes = args.iso
+    # iso_codes = [
+    #     "THA", 'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
+    # ]
+    # iso_codes = [
+    #     "VNM"
+    # ]
     iso_codes = [
-        "THA", 'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
+    'ATG', 'AIA', 'YEM', 'SEN', 'BWA', 'MDG', 'BEN', 'BIH', 'BLZ', 'BRB', 
+    'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
+    'KNA', 'LCA', 'MNG', 'MSR', 'MWI', 'NAM', 'NER', 'NGA', 'PAN', 'RWA', 
+    'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
+    'ZWE', 'BRA', 
+    
+    'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
     ]
     c["iso_codes"] = iso_codes
     iso = iso_codes[0]
@@ -253,6 +268,6 @@ if __name__ == "__main__":
 
     test_flag = args.test
     if test_flag:
-        test(c, args.exp_name)
+        test(c, args.exp_name, args.dataset)
     else:
-        main(c, args.exp_name)
+        main(c, args.exp_name, args.dataset)

@@ -65,11 +65,9 @@ if __name__ == "__main__":
         classes_dict = {c["pos_class"] : 1, c["neg_class"]: 0}
         transforms = cnn_utils.get_transforms(size=c["img_size"])
         dataset =  cnn_utils.SchoolDataset(
-                subdata
-                .sample(frac=1, random_state=SEED)
-                .reset_index(drop=True),
+                subdata,
                 classes_dict,
-                transforms["train"]
+                transforms["test"]
         )
 
 
@@ -77,8 +75,8 @@ if __name__ == "__main__":
                 dataset,
                 batch_size=c["batch_size"],
                 num_workers=c["n_workers"],
-                shuffle=True,
-                drop_last=True
+                shuffle=False,
+                drop_last=False
         )
 
 
@@ -98,9 +96,19 @@ if __name__ == "__main__":
         file = open(out_file, "wb")
         np.save(file, losses)
 
+        mask = losses < 0.75
+        data_filtered = subdata[mask]
+        subdata2 = data["test"].dataset
+        data_filtered = pd.concat([data_filtered, subdata2])
+        filtered_file = os.path.join(cwd, "data", "vectors", "train", "highres_old_filtered_train.geojson")
+        data_filtered.to_file(filtered_file,  driver="GeoJSON")
+
     file = open(out_file, 'rb')
     losses = np.load(file)
 
 
-    plt.hist(losses, bins=200)
-    plt.savefig(os.path.join(exp_dir, "loss_hist.png"))
+    #plt.hist(losses, bins=200)
+    #plt.savefig(os.path.join(exp_dir, "loss_hist.png"))
+
+
+

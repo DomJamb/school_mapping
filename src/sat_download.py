@@ -126,6 +126,43 @@ def download_sat_images(
                 ) 
         tasks.append((image_file, bbox))
 
+        if category == "school":
+            image_file_shifted_1 = f"{dest_dir}/{iso}/{category}/shifted/{data[id_col][index]}_SHIFTED-1.jpeg"
+            bbox_shifted_1 = (
+                bbox[0] + 100,
+                bbox[1] + 100,
+                bbox[2] + 100,
+                bbox[3] + 100
+            )
+            tasks.append((image_file_shifted_1, bbox_shifted_1))
+
+            image_file_shifted_2 = f"{dest_dir}/{iso}/{category}/shifted/{data[id_col][index]}_SHIFTED-2.jpeg"
+            bbox_shifted_2 = (
+                bbox[0] + 100,
+                bbox[1] - 100,
+                bbox[2] + 100,
+                bbox[3] - 100
+            )
+            tasks.append((image_file_shifted_2, bbox_shifted_2))
+
+            image_file_shifted_3 = f"{dest_dir}/{iso}/{category}/shifted/{data[id_col][index]}_SHIFTED-3.jpeg"
+            bbox_shifted_3 = (
+                bbox[0] - 100,
+                bbox[1] - 100,
+                bbox[2] - 100,
+                bbox[3] - 100
+            )
+            tasks.append((image_file_shifted_3, bbox_shifted_3))
+
+            image_file_shifted_4 = f"{dest_dir}/{iso}/{category}/shifted/{data[id_col][index]}_SHIFTED-4.jpeg"
+            bbox_shifted_4 = (
+                bbox[0] - 100,
+                bbox[1] + 100,
+                bbox[2] - 100,
+                bbox[3] + 100
+            )
+            tasks.append((image_file_shifted_4, bbox_shifted_4))
+
     task_queue = Queue()
 
     # Number of consumer threads
@@ -198,14 +235,14 @@ def main():
     for iso_code in iso_codes:
         try:
             download_sat_images(creds, config, iso=iso_code, category="school")
-        except:
-            print(f"error with iso code {iso_code}")
-
-    for iso_code in iso_codes:
-        try:
-            download_sat_images(creds, config, iso=iso_code, category="non_school")
         except Exception as e:
             print(f"error with iso code {iso_code}: {e}")
+
+    # for iso_code in iso_codes:
+    #     try:
+    #         download_sat_images(creds, config, iso=iso_code, category="non_school")
+    #     except Exception as e:
+    #         print(f"error with iso code {iso_code}: {e}")
     
 
 
