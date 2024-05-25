@@ -4,6 +4,7 @@ from io import BytesIO
 import threading
 from queue import Queue
 import time
+import numpy as np
 
 import os
 
@@ -49,18 +50,18 @@ def fetch_satellite_image(bbox):
         "bbox={bbox}&bboxSR=3857&imageSR=3857&size={size}&format=jpeg&f=image"
     )
 
-    size = 500
+    size = int(500 * np.sqrt(2))
     url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
     response = requests.get(url)
     if response.status_code == 200:
         return Image.open(BytesIO(response.content)), True
     
-    size = 250
+    size = int(250 * np.sqrt(2))
     url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
     response = requests.get(url)
     if response.status_code == 200:
         img = Image.open(BytesIO(response.content))
-        img = img.resize((500, 500), Image.BICUBIC)
+        img = img.resize((int(500 * np.sqrt(2)), int(500 * np.sqrt(2))), Image.BICUBIC)
         # TODO: na neki način zabilježiti koji bboxovi su preuzeti na 250x250
         return img, False
 

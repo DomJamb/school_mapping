@@ -28,6 +28,7 @@ from torchvision.models import (
     EfficientNet_B0_Weights,
 )
 import torch.nn.functional as nnf
+from torch.utils.data.sampler import Sampler
 
 import sys
 sys.path.insert(0, "../utils/")
@@ -49,7 +50,6 @@ def get_state_dict(self, *args, **kwargs):
     return load_state_dict_from_url(self.url, *args, **kwargs)
 WeightsEnum.get_state_dict = get_state_dict
 
-    
 class SchoolDataset(Dataset):
     def __init__(self, dataset, classes, transform=None):
         """
@@ -101,6 +101,72 @@ class SchoolDataset(Dataset):
         """
         
         return len(self.dataset)
+
+class WeightedSchoolDataset(Dataset):
+    def __init__(self, dataset, classes, transform=None):
+        """
+        Custom dataset for Caribbean images.
+
+        Args:
+        - dataset (pandas.DataFrame): The dataset containing image information.
+        - attribute (str): The column name specifying the attribute for classification.
+        - classes (dict): A dictionary mapping attribute values to classes.
+        - transform (callable, optional): Optional transformations to apply to the image. 
+        Defaults to None.
+        - prefix (str, optional): Prefix to append to file paths. Defaults to an empty string.
+        """
+        
+        self.dataset = dataset
+        self.dataset_school = dataset[dataset["class"] == "school"]
+        self.num_schools = len(self.dataset_school)
+        self.dataset_non_school = dataset[dataset["class"] == "non_school"]
+        self.num_non_schools = len(self.dataset_non_school)
+        self.bigget_dataset_size = self.num_non_schools if self.num_non_schools > self.num_schools else self.num_schools
+        self.smaller_dataset_size = self.num_schools if self.num_non_schools > self.num_schools else self.num_non_schools
+        self.bigger_dataset = self.dataset_non_school if self.num_non_schools > self.num_schools else self.dataset_school
+        self.smaller_dataset = self.dataset_school if self.num_non_schools > self.num_schools else self.dataset_non_school
+        self.transform = transform
+        self.classes = classes
+
+    def __getitem__(self, index):
+        """
+        Retrieves an item (image and label) from the dataset based on index.
+
+        Args:
+        - index (int): Index of the item to retrieve.
+
+        Returns:
+        - tuple: A tuple containing the transformed image (if transform is specified)
+        and its label.
+        """
+        
+        if index >= self.bigget_dataset_size:
+            item = self.smaller_dataset.iloc[(index - self.bigget_dataset_size) % self.smaller_dataset_size]
+        else:
+            item = self.bigger_dataset.iloc[index]
+
+        #item = self.dataset.iloc[index]
+        uid = item["UID"]
+        filepath= item["filepath"]
+        image = Image.open(filepath).convert("RGB")
+
+        if self.transform:
+            x = self.transform(image)
+
+        y = self.classes[item["class"]]
+        image.close()
+        return x, y, uid
+
+    def __len__(self):
+        """
+        Returns the length of the dataset.
+
+        Returns:
+        - int: Length of the dataset.
+        """
+        
+        #return len(self.dataset)
+        return 2 * self.bigget_dataset_size
 
 
 def visualize_data(data, data_loader, phase="test", n=4):
@@ -166,6 +232,24 @@ def load_dataset(config, phases, name=None):
     classes = list(dataset["class"].unique())
     logging.info(f" Classes: {classes}")
 
+    #sampler = SchoolSampler(dataset, 14)
+    # data = {
+    #     phase: WeightedSchoolDataset(
+    #         dataset[dataset.dataset==phase]
+    #         .sample(frac=1, random_state=SEED)
+    #         .reset_index(drop=True),
+    #         classes_dict,
+    #         transforms[phase]
+    #     ) if phase == "train" else SchoolDataset(
+    #         dataset[dataset.dataset==phase]
+    #         .sample(frac=1, random_state=SEED)
+    #         .reset_index(drop=True),
+    #         classes_dict,
+    #         transforms[phase]
+    #     )
+    #     for phase in phases
+    # }
+
     data = {
         phase: SchoolDataset(
             dataset[dataset.dataset==phase]
@@ -173,7 +257,7 @@ def load_dataset(config, phases, name=None):
             .reset_index(drop=True),
             classes_dict,
             transforms[phase]
-        )
+        ) 
         for phase in phases
     }
 
@@ -242,7 +326,7 @@ def train(data_loader, model, criterion, optimizer, device, logging, pos_label, 
     return epoch_results
 
 
-def evaluate(data_loader, class_names, model, criterion, device, logging, pos_label, wandb=None):
+def evaluate(data_loader, class_names, model, criterion, device, logging, pos_label, wandb=None, threshold=0.5):
     """
     Evaluate the model using the provided data.
 
@@ -273,9 +357,12 @@ def evaluate(data_loader, class_names, model, criterion, device, logging, pos_la
 
         with torch.set_grad_enabled(False):
             outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
             soft_outputs = nnf.softmax(outputs, dim=1)
+            positive_probs = soft_outputs[:, 1]
             probs, _ = soft_outputs.topk(1, dim=1)
+            #_, preds = torch.max(outputs, 1)
+            preds = (positive_probs > threshold).int()
+            
             loss = criterion(outputs, labels)
 
         running_loss += loss.item() * inputs.size(0)
@@ -319,8 +406,10 @@ def get_transforms(size):
     return {
         "train": transforms.Compose(
             [
-                transforms.Resize(size),
-                transforms.RandomApply([transforms.RandomRotation((90, 90))], p=0.5),
+                #transforms.Resize(size),
+                #transforms.RandomApply([transforms.RandomRotation((90, 90))], p=0.5),
+                transforms.RandomRotation((0,90)),
+                transforms.CenterCrop(352),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomVerticalFlip(),
                 transforms.ToTensor(),
@@ -330,8 +419,9 @@ def get_transforms(size):
         "test": transforms.Compose(
             [
                 
-                transforms.Resize(size),
-                transforms.CenterCrop(size),
+                #transforms.Resize(size),
+                #transforms.CenterCrop(size),
+                transforms.CenterCrop(352),
                 transforms.ToTensor(),
                 transforms.Normalize(imagenet_mean, imagenet_std),
             ]
