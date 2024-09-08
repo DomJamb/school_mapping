@@ -8,6 +8,7 @@ import logging
 import data_utils
 import pandas as pd
 
+from torch.utils.data import DataLoader
 import cv2
 import torch
 import torch.nn as nn
@@ -18,6 +19,9 @@ from foundation import Foundation
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import random
+
+from pathlib import Path
+
 SEED = 42
 
 device = torch.device('cuda' if torch.cuda.is_available() else "cpu")  
@@ -83,20 +87,31 @@ def load_image(image_file, image_size) -> torch.Tensor:
 
 def compute_embeddings(files, model, image_size):        
     embeddings = []
+    ids = []
+    images = []
+    for file in files:
+        images.append(load_image(file, image_size).to(device))
+        ids.append(Path(file).stem)
+
+    dataloader = DataLoader(images, batch_size=64, shuffle=False)
+
     with torch.no_grad():
         pbar = data_utils._create_progress_bar(files)
         for file in pbar:
-            if "dinov2" in model.name:
-                image = load_image(file, image_size).to(device)
-                embedding = model(image)
-                embedding = np.array(embedding[0].cpu().numpy()).reshape(1, -1)[0]
-            elif "esa" in model.name:
-                image = load_image_esa(file, image_size).to(device)
-                _, embedding, _, _ = model(image)
-                embedding = embedding[0, :].cpu().detach().float().numpy().tolist()
-            embeddings.append(embedding)
+            try:
+                if "dinov2" in model.name:
+                    image = load_image(file, image_size).to(device)
+                    embedding = model(image)
+                    embedding = np.array(embedding[0].cpu().numpy()).reshape(1, -1)[0]
+                elif "esa" in model.name:
+                    image = load_image_esa(file, image_size).to(device)
+                    _, embedding, _, _ = model(image)
+                    embedding = embedding[0, :].cpu().detach().float().numpy().tolist()
+                embeddings.append(embedding)
+            except:
+                pass
             
-    return embeddings
+    return embeddings, ids
 
 
 def get_image_embeddings(
