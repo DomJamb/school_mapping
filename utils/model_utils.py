@@ -126,7 +126,8 @@ def get_cv(c):
         "GridSearchCV",
     ]
 
-    scoring = eval_utils.get_scoring(c["pos_class"])
+    #scoring = eval_utils.get_scoring(c["pos_class"])
+    scoring = eval_utils.get_scoring(1)
     if cv == "RandomizedSearchCV":
         return RandomizedSearchCV(
             pipe, params, scoring=scoring, random_state=SEED, **cv_params
@@ -157,7 +158,8 @@ def model_trainer(c, data, features, target):
 
     cv = get_cv(c)
     logging.info(cv)
-    cv.fit(X, y)
+    cv.fit(X[:10000], y[:10000])
+    #cv.fit(X, y)
 
     logging.info("Best estimator: {}".format(cv.best_estimator_))
     return cv
@@ -168,13 +170,15 @@ def load_data(
     attributes=["rurban"],
     in_dir="clean", 
     out_dir="train",
+    name = None,
     verbose=True
 ):
     cwd = os.path.dirname(os.getcwd())
     vector_dir = os.path.join(cwd, config["vectors_dir"])
     iso_codes = config["iso_codes"]
-    name = iso_codes[0] 
-    if "name" in config:
+    if name is None:
+        name = iso_codes[0] 
+    if "name" in config and name is None:
         name = config["name"] if config["name"] else name
     test_size = config["test_size"]
 
@@ -190,20 +194,23 @@ def load_data(
     data = []
     data_utils._makedir(os.path.dirname(out_file))
     for iso_code in iso_codes:
-        in_file = f"{iso_code}_{in_dir}.geojson"
-        pos_file = os.path.join(vector_dir, config["pos_class"], in_dir, in_file)
-        neg_file = os.path.join(vector_dir, config["neg_class"], in_dir, in_file)
-        
-        pos = gpd.read_file(pos_file)
-        pos["class"] = config["pos_class"]
-        if "validated" in pos.columns:
-            pos = pos[pos["validated"] == 0]
+        try:
+            in_file = f"{iso_code}_{in_dir}.geojson"
+            pos_file = os.path.join(vector_dir, config["pos_class"], in_dir, in_file)
+            neg_file = os.path.join(vector_dir, config["neg_class"], in_dir, in_file)
             
-        neg = gpd.read_file(neg_file)
-        neg["class"] = config["neg_class"]
-        if "validated" in neg.columns:
-            neg = neg[neg["validated"] == 0]
-        data.append(pd.concat([pos, neg]))
+            pos = gpd.read_file(pos_file)
+            pos["class"] = config["pos_class"]
+            if "validated" in pos.columns:
+                pos = pos[pos["validated"] == 0]
+                
+            neg = gpd.read_file(neg_file)
+            neg["class"] = config["neg_class"]
+            if "validated" in neg.columns:
+                neg = neg[neg["validated"] == 0]
+            data.append(pd.concat([pos, neg]))
+        except:
+            pass
     
     data = gpd.GeoDataFrame(pd.concat(data))
     data = data[(data["clean"] == 0)]
@@ -280,8 +287,10 @@ def _get_rurban_classification(config, data):
     coord_list = [(x, y) for x, y in zip(data["geometry"].x, data["geometry"].y)]
 
     cwd = os.path.dirname(os.getcwd())
-    raster_dir = os.path.join(cwd, config["rasters_dir"])
-    ghsl_path = os.path.join(raster_dir, "ghsl", config["ghsl_built_c_file"])
+    #raster_dir = os.path.join(cwd, config["rasters_dir"])
+    #ghsl_path = os.path.join(raster_dir, "ghsl", config["ghsl_built_c_file"])
+    ghsl_dir = config["ghsl_dir"]
+    ghsl_path = os.path.join(ghsl_dir, config["ghsl_built_c_file"])
     with rio.open(ghsl_path) as src:
         data["ghsl_smod"]  = [x[0] for x in src.sample(coord_list)]
 

@@ -16,3 +16,13 @@ ghsl_built_c_url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_BUI
 ghsl_smod_url: "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_SMOD_GLOBE_R2023A/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000/V1-0/GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V1_0.zip"
 ghsl_built_c_file: "GHS_BUILT_C_FUN_E2018_GLOBE_R2023A_54009_10_V1_0.tif"
 ghsl_smod_file: "GHS_SMOD_E2030_GLOBE_R2023A_54009_1000_V1_0.tif"
+
+columns: ['UID', 'source', 'iso', 'country', 'region', 'subregion', 'name', 'geometry', 'giga_id_school']
+
+iso_codes: [
+    'ATG', 'AIA', 'YEM', 'SEN', 'BWA', 'MDG', 'BEN', 'BIH', 'BLZ', 'BRB', 
+    'CRI', 'DMA', 'GHA', 'GIN', 'GRD', 'HND', 'HUN', 'KAZ', 'KEN', 'KIR', 
+    'KNA', 'LCA', 'MNG', 'MSR', 'MWI', 'NAM', 'NER', 'NGA', 'PAN', 'RWA', 
+    'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
+    'ZWE', 'BRA'
+]

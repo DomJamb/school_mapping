@@ -24,7 +24,7 @@ def main():
     config_file = os.path.join(cwd, args.config)
     config = config_utils.load_config(config_file)
 
-    clean_utils.clean_data(config, category=config["pos_class"])
+    #clean_utils.clean_data(config, category=config["pos_class"])
     clean_utils.clean_data(config, category=config["neg_class"])
 
 

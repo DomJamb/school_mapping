@@ -45,7 +45,7 @@ SELECTORS = {
 }
 MODELS = {
     "LogisticRegression": LogisticRegression(
-        max_iter=1000, n_jobs=-1, random_state=SEED
+        max_iter=5000, n_jobs=-1, random_state=SEED
     ),
     "SGDClassifier": SGDClassifier(random_state=SEED),
     "RidgeClassifier": RidgeClassifier(random_state=SEED),

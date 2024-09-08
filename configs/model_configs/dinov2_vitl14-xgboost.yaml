@@ -1,0 +1,17 @@
+embed_model: "dinov2_vitl14"
+test_size: 0.2
+image_size: 560
+model: 'XGBClassifier'
+model_params:
+    max_depth: [4, 6, 8]
+    eta: [0.1, 1]
+    lambda: [0.01, 0.1]
+selector: 
+selector_params:
+scalers: ['MinMaxScaler', 'StandardScaler']
+cv: "GridSearchCV"
+cv_params:
+   cv: 5
+   refit: 'f1_score'
+   verbose: 1
+   n_jobs: -1

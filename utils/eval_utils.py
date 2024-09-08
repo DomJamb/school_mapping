@@ -65,7 +65,7 @@ def save_results(test, target, pos_class, classes, results_dir, prefix=None, log
         results = {f"{prefix}_{key}": val for key, val in results.items()}
     if log: 
         logging.info(results)
-        wandb.log(results)
+        #wandb.log(results)
     return results
 
 
@@ -95,7 +95,7 @@ def get_confusion_matrix(y_true, y_pred, class_names):
 
     cm_metrics = _get_cm_metrics(cm, list(cm.columns))
     cm_report = classification_report(
-        y_true, y_pred, target_names=class_names, zero_division=0
+        y_true, y_pred, target_names=[str(c) for c in class_names], zero_division=0
     )
 
     return cm, cm_metrics, cm_report

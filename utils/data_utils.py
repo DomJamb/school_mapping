@@ -17,16 +17,22 @@ pd.options.mode.chained_assignment = None
 logging.basicConfig(level=logging.INFO)
 
 
-def get_image_filepaths(config, data, in_dir=None, ext=".tiff"):
+def get_image_filepaths(config, data, in_dir=None, ext=".jpeg"):
     filepaths = []
     cwd = os.path.dirname(os.getcwd())
     for index, row in data.iterrows():
         file = f"{row['UID']}{ext}"
         if not in_dir:
-            filepath = os.path.join(
-                cwd, 
-                config["rasters_dir"], 
-                config["maxar_dir"], 
+            # filepath = os.path.join(
+            #     cwd, 
+            #     config["rasters_dir"], 
+            #     config["maxar_dir"], 
+            #     row["iso"], 
+            #     row["class"],
+            #     file 
+            # )
+            filepath = os.path.join( 
+                config["images_dir"], 
                 row["iso"], 
                 row["class"],
                 file 

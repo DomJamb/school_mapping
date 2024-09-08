@@ -4,6 +4,9 @@ from io import BytesIO
 import threading
 from queue import Queue
 import time
+import numpy as np
+
+import os
 
 def producer(task_queue, tasks):
     for task in tasks:
@@ -16,28 +19,66 @@ def consumer(task_queue):
             task_queue.task_done()
             break
         image_name, bbox = task
-        image = fetch_satellite_image(bbox)
-        if isinstance(image, Image.Image):
-            save_image(image, image_name)
-            print(f"{image_name} saved.")
-        else:
-            print(f"Failed to download image for {bbox}: {image}")
+        #print(f"image name: {image_name}")
+        image_name_lowres = os.path.join(os.path.dirname(image_name), "lowres", os.path.basename(image_name))
+        #print(f"image name lowres: {image_name_lowres}")
+
+        if os.path.exists(image_name) or os.path.exists(image_name_lowres):
+            task_queue.task_done()
+            continue
+
+        try:
+            image, highres = fetch_satellite_image(bbox)
+            if isinstance(image, Image.Image):
+
+                if highres:
+                    save_image(image, image_name)
+                    print(f"{image_name} saved.")
+                else:
+                    save_image(image, image_name_lowres)
+                    print(f"{image_name_lowres} saved.")
+                
+            else:
+                print(f"Failed to download image for {bbox}: {image}")
+        except Exception as e:
+            print (f"problem with {image_name}")
         task_queue.task_done()
 
 def fetch_satellite_image(bbox):
     url_template = (
         "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/export?"
-        "bbox={bbox}&bboxSR=3857&imageSR=3857&size=500,500&format=jpeg&f=image"
+        "bbox={bbox}&bboxSR=3857&imageSR=3857&size={size}&format=jpeg&f=image"
     )
-    url = url_template.format(bbox=",".join(map(str, bbox)))
-    print(url)
+
+    size = int(500 * np.sqrt(2))
+    url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
     response = requests.get(url)
     if response.status_code == 200:
-        return Image.open(BytesIO(response.content))
-    else:
-        return f"Error: {response.status_code}"
+        return Image.open(BytesIO(response.content)), True
+    
+    size = int(250 * np.sqrt(2))
+    url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
+    response = requests.get(url)
+    if response.status_code == 200:
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((int(500 * np.sqrt(2)), int(500 * np.sqrt(2))), Image.BICUBIC)
+        # TODO: na neki način zabilježiti koji bboxovi su preuzeti na 250x250
+        return img, False
+
+    # [ovo je zakomentirano jer bolje da zasad ostanemo na 500 i 250 jer ćemo vjerojatno većinu slika uspijeti tako pribaviti]
+    #size = 125
+    #url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
+    #if response.status_code == 200:
+    #    img = Image.open(BytesIO(response.content))
+    #    img = img.resize((500, 500), Image.BICUBIC)
+    #    return img
+
+    return f"Error: {response.status_code}"
 
 def save_image(img, output_path):
+    if not os.path.exists(os.path.dirname(output_path)):
+        os.makedirs(os.path.dirname(output_path))
+
     if img.mode == 'RGBA':
         img = img.convert('RGB')
     img.save(output_path)

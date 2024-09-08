@@ -24,14 +24,14 @@ from pathlib import Path
 
 SEED = 42
 
-device = torch.device('cuda' if torch.cuda.is_available() else "cpu")  
+device = torch.device('cuda:1' if torch.cuda.is_available() else "cpu")  
 cwd = os.path.dirname(os.getcwd())
 
 def load_model(config):    
     if "dinov2" in config["embed_model"]:
         model = torch.hub.load("facebookresearch/dinov2", config["embed_model"])
         model.name = config["embed_model"]
-        device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+        device = torch.device('cuda:1' if torch.cuda.is_available() else "cpu")
         model.eval()
         model.to(device)
         
@@ -51,10 +51,10 @@ def load_model(config):
             activation=nn.ReLU6(),
         )
         model.name = config["embed_model"]
-        device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
+        device = torch.device('cuda:1' if torch.cuda.is_available() else "cpu")
         model.load_state_dict(torch.load(model_file, map_location=device), strict=False)
         if torch.cuda.is_available():
-            model.cuda()
+            model.to(device=device)
         model.eval()
     return model
 
@@ -88,6 +88,7 @@ def load_image(image_file, image_size) -> torch.Tensor:
 def compute_embeddings(files, model, image_size):        
     embeddings = []
     ids = []
+<<<<<<< HEAD
     images = []
     for file in files:
         images.append(load_image(file, image_size).to(device))
@@ -95,6 +96,8 @@ def compute_embeddings(files, model, image_size):
 
     dataloader = DataLoader(images, batch_size=64, shuffle=False)
 
+=======
+>>>>>>> 26a281867361b0b523b3c055c152b2a4e6882174
     with torch.no_grad():
         pbar = data_utils._create_progress_bar(files)
         for file in pbar:
@@ -108,6 +111,10 @@ def compute_embeddings(files, model, image_size):
                     _, embedding, _, _ = model(image)
                     embedding = embedding[0, :].cpu().detach().float().numpy().tolist()
                 embeddings.append(embedding)
+<<<<<<< HEAD
+=======
+                ids.append(Path(file).stem)
+>>>>>>> 26a281867361b0b523b3c055c152b2a4e6882174
             except:
                 pass
             
@@ -138,12 +145,14 @@ def get_image_embeddings(
             embeddings = embeddings.set_index(id_col)
         return embeddings
     
-    embeddings = compute_embeddings(files, model, config["image_size"])
-    embeddings = pd.DataFrame(data=embeddings, index=data[id_col])
+    embeddings, ids = compute_embeddings(files, model, config["image_size"])
+    embeddings = pd.DataFrame(data=embeddings, index=ids)
+
+    data2 = data[data['UID'].isin(ids)]
 
     for column in columns:
-        embeddings[column] = data[column].values
-    embeddings.to_csv(filename)
+        embeddings[column] = data2[column].values
+    embeddings.to_csv(filename, index=False)
     
     logging.info(f"Saved to {filename}")
     return embeddings
