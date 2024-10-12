@@ -113,17 +113,17 @@ def download_sat_images(
     #             #logging.info(e)
     #             pass
 
-    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images'
+    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images'
 
     tasks = []
     for index in range(len(data)):
         #image_file = f"../{dest_dir}/{data[id_col][index]}.jpeg"
         image_file = f"{dest_dir}/large/{iso}/{category}/{data[id_col][index]}.jpeg"
         bbox = (
-                     data.lon[index] - config["size"] * np.sqrt(2),
-                     data.lat[index] - config["size"] * np.sqrt(2),
-                     data.lon[index] + config["size"] * np.sqrt(2),
-                     data.lat[index] + config["size"] * np.sqrt(2),
+                     data.lon[index] - config["size"] * np.sqrt(2) ,
+                     data.lat[index] - config["size"] * np.sqrt(2) ,
+                     data.lon[index] + config["size"] * np.sqrt(2) ,
+                     data.lat[index] + config["size"] * np.sqrt(2) ,
                 ) 
         tasks.append((image_file, bbox))
 
@@ -163,7 +163,6 @@ def download_sat_images(
         #         bbox[3] + 100
         #     )
         #     tasks.append((image_file_shifted_4, bbox_shifted_4))
-
     task_queue = Queue()
 
     # Number of consumer threads
@@ -232,7 +231,7 @@ def main():
 
         'VNM', 'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
     ]
-    #iso_codes = [ "ATG" ]
+    #iso_codes = [ "KEN" ]
     for iso_code in iso_codes:
         try:
             download_sat_images(creds, config, iso=iso_code, category="school")

@@ -1,5 +1,5 @@
 test_size: 0.2
-batch_size: 48
+batch_size: 24
 n_workers: 4
 n_epochs: 30
 

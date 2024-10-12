@@ -30,6 +30,9 @@ from torchvision.models import (
 import torch.nn.functional as nnf
 from torch.utils.data.sampler import Sampler
 
+import lightning as L
+from torchmetrics.classification import BinaryF1Score
+
 import sys
 sys.path.insert(0, "../utils/")
 import eval_utils
@@ -49,6 +52,78 @@ def get_state_dict(self, *args, **kwargs):
     kwargs.pop("check_hash")
     return load_state_dict_from_url(self.url, *args, **kwargs)
 WeightsEnum.get_state_dict = get_state_dict
+
+transform_tencrop = transforms.Compose(
+        [
+            transforms.CenterCrop(500),
+            transforms.FiveCrop(size=352),
+        ]
+    )
+
+class LightningWrapper(L.LightningModule):
+    def __init__(self, encoder, use_tencrop = False):
+        super().__init__()
+        self.encoder = encoder
+        self.f1 = BinaryF1Score()
+        self.use_tencrop = use_tencrop
+    
+    def training_step(self, batch, batch_idx):
+        x, y = batch[0], batch[1]            
+
+        if self.use_tencrop:
+            x_tencrop = transform_tencrop(x)
+            y_max = torch.zeros(y.shape, device=y.device)
+            x_max = None
+            for xc in x_tencrop:
+                if x_max is None:
+                    x_max = torch.zeros(xc.shape, device = xc.device)
+                y_hat = self.encoder(xc)
+                soft_outputs = nnf.softmax(y_hat, dim=1).squeeze()
+                positive_prob = soft_outputs[:, 1]
+                x_max[positive_prob>y_max] = xc[positive_prob>y_max]
+                y_max[positive_prob>y_max] = positive_prob[positive_prob>y_max]
+            x = x_max
+        
+        y_hat = self.encoder(x)
+        loss = nnf.cross_entropy(y_hat, y, label_smoothing=0.1)
+
+        outputs = self.encoder(x)
+        soft_outputs = nnf.softmax(outputs, dim=1)
+        positive_probs = soft_outputs[:, 1]
+        f1 = self.f1(positive_probs, y)
+        self.log_dict({"train_loss": loss, "train_F1": f1}, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        return loss
+    
+    def validation_step(self, batch, batch_idx):
+        x, y = batch[0], batch[1]
+        y_hat = self.encoder(x)
+        val_loss = nnf.cross_entropy(y_hat, y)
+
+        outputs = self.encoder(x)
+        soft_outputs = nnf.softmax(outputs, dim=1)
+        positive_probs = soft_outputs[:, 1]
+        f1 = self.f1(positive_probs, y)
+        self.log_dict({"val_loss": val_loss, "val_F1": f1}, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True)
+        return {"val_loss": val_loss, "val_F1": f1}
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch[0], batch[1]
+        y_hat = self.encoder(x)
+        test_loss = nnf.cross_entropy(y_hat, y)
+        self.log("test_loss", test_loss, sync_dist=True)
+
+    def predict_step(self, batch, batch_idx):
+        x, y = batch
+        pred = self.encoder(x)
+        return pred
+    
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.encoder.parameters(), lr=1e-5)
+        lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, factor=0.1, patience=7, mode='max'
+        )
+        return {"optimizer": optimizer, "lr_scheduler": lr_scheduler, "monitor": "val_F1"}
+        return [optimizer], [lr_scheduler]
 
 class SchoolDataset(Dataset):
     def __init__(self, dataset, classes, transform=None):
@@ -200,7 +275,7 @@ def visualize_data(data, data_loader, phase="test", n=4):
 
 
 def remove_data_without_images(dataset):
-    mask = dataset["filepath"].apply(lambda filepath: os.path.exists(filepath))
+    mask = dataset["filepath"].apply(lambda filepath: os.path.exists(filepath) and os.path.getsize(filepath) > 10000)
     filtered_dataset = dataset[mask]
     return filtered_dataset
 
@@ -220,7 +295,7 @@ def load_dataset(config, phases, name=None):
         - dict: A dictionary containing classes and their mappings.
     """
     
-    dataset = model_utils.load_data(config, attributes=["rurban", "iso"], verbose=True, name=name)
+    dataset = model_utils.load_data(config, attributes=["rurban", "iso"], verbose=False, name=name)
     dataset["filepath"] = data_utils.get_image_filepaths(config, dataset)
 
     # Remove data entries which do not have a corresponding sattelite image file
@@ -266,14 +341,65 @@ def load_dataset(config, phases, name=None):
             data[phase],
             batch_size=config["batch_size"],
             num_workers=config["n_workers"],
-            shuffle=True,
-            drop_last=True
+            shuffle=True if phase == "train" else False,
+            drop_last=True if phase == "train" else False
         )
         for phase in phases
     }
 
     return data, data_loader, classes
 
+
+def train_tencrop(data_loader, model, criterion, optimizer, device, logging, pos_label, wandb=None):
+    """
+    Train the model on the provided data.
+
+    Args:
+    - data_loader (torch.utils.data.DataLoader): DataLoader containing training data.
+    - model (torch.nn.Module): The neural network model.
+    - criterion: Loss function.
+    - optimizer: Optimization algorithm.
+    - device (str): Device to run the training on (e.g., 'cuda' or 'cpu').
+    - logging: Logging object to record training information.
+    - wandb: Weights & Biases object for logging if available. Defaults to None.
+
+    Returns:
+    - dict: Results of the training including loss and evaluation metrics.
+    """
+    
+    model.train()
+
+    y_actuals, y_preds = [], []
+    running_loss = 0.0
+    for inputs, labels, _ in tqdm(data_loader, total=len(data_loader)):
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        optimizer.zero_grad()
+
+        with torch.set_grad_enabled(True):
+            #with torch.autocast(device_type="cuda", dtype=torch.float16):
+            outputs = model(inputs)
+            _, preds = torch.max(outputs, 1)
+            loss = criterion(outputs, labels)
+
+            loss.backward()
+            optimizer.step()
+
+            running_loss += loss.item() * inputs.size(0)
+            y_actuals.extend(labels.cpu().numpy().tolist())
+            y_preds.extend(preds.data.cpu().numpy().tolist())
+
+    epoch_loss = running_loss / len(data_loader)
+    epoch_results = eval_utils.evaluate(y_actuals, y_preds, pos_label)
+    epoch_results["loss"] = epoch_loss
+
+    learning_rate = optimizer.param_groups[0]["lr"]
+    logging.info(f"Train Loss: {epoch_loss} {epoch_results} LR: {learning_rate}")
+
+    #if wandb is not None:
+        #wandb.log({"train_" + k: v for k, v in epoch_results.items()})
+    return epoch_results
 
 def train(data_loader, model, criterion, optimizer, device, logging, pos_label, wandb=None):
     """
@@ -303,6 +429,7 @@ def train(data_loader, model, criterion, optimizer, device, logging, pos_label, 
         optimizer.zero_grad()
 
         with torch.set_grad_enabled(True):
+            #with torch.autocast(device_type="cuda", dtype=torch.float16):
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
             loss = criterion(outputs, labels)
@@ -356,6 +483,7 @@ def evaluate(data_loader, class_names, model, criterion, device, logging, pos_la
         labels = labels.to(device)
 
         with torch.set_grad_enabled(False):
+            #with torch.autocast(device_type="cuda", dtype=torch.float16):
             outputs = model(inputs)
             soft_outputs = nnf.softmax(outputs, dim=1)
             positive_probs = soft_outputs[:, 1]
@@ -408,8 +536,8 @@ def get_transforms(size):
             [
                 #transforms.Resize(size),
                 #transforms.RandomApply([transforms.RandomRotation((90, 90))], p=0.5),
-                transforms.RandomRotation((0,90)),
-                transforms.CenterCrop(352),
+                transforms.RandomRotation((0,360)),
+                transforms.CenterCrop(500),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomVerticalFlip(),
                 transforms.ToTensor(),
@@ -421,7 +549,7 @@ def get_transforms(size):
                 
                 #transforms.Resize(size),
                 #transforms.CenterCrop(size),
-                transforms.CenterCrop(352),
+                transforms.CenterCrop(500),
                 transforms.ToTensor(),
                 transforms.Normalize(imagenet_mean, imagenet_std),
             ]
@@ -543,3 +671,45 @@ def load_model(
         )
 
     return model, criterion, optimizer, scheduler
+
+def load_model_lightning(
+    model_type,
+    n_classes,
+    pretrained,
+    scheduler_type,
+    optimizer_type,
+    label_smoothing=0.0,
+    lr=0.001,
+    momentum=0.9,
+    gamma=0.1,
+    step_size=7,
+    patience=7,
+    dropout=0,
+    device="cpu",
+    use_tencrop = False
+):
+    """
+    Load a neural network model with specified configurations.
+
+    Args:
+    - model_type (str): The type of model architecture to use.
+    - n_classes (int): The number of output classes.
+    - pretrained (bool): Whether to use pre-trained weights.
+    - scheduler_type (str): The type of learning rate scheduler to use.
+    - optimizer_type (str): The type of optimizer to use.
+    - label_smoothing (float, optional): Label smoothing parameter. Defaults to 0.0.
+    - lr (float, optional): Learning rate. Defaults to 0.001.
+    - momentum (float, optional): Momentum factor for SGD optimizer. Defaults to 0.9.
+    - gamma (float, optional): Gamma factor for learning rate scheduler. Defaults to 0.1.
+    - step_size (int, optional): Step size for learning rate scheduler. Defaults to 7.
+    - patience (int, optional): Patience for ReduceLROnPlateau scheduler. Defaults to 7.
+    - dropout (float, optional): Dropout rate if applicable. Defaults to 0.
+    - device (str, optional): Device to run the model on. Defaults to "cpu".
+
+    Returns:
+    - tuple: A tuple containing the loaded model, criterion, optimizer, and scheduler.
+    """
+    
+    model = get_model(model_type, n_classes, dropout)
+    model = LightningWrapper(model, use_tencrop=use_tencrop)
+    return model

@@ -30,6 +30,7 @@ def main(c, exp_name="all", dataset_name=None):
     if not os.path.exists(exp_dir):
         os.makedirs(exp_dir)
     
+    log_string = ""
     logname = os.path.join(exp_dir, f"{exp_name}.log")
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
@@ -64,7 +65,7 @@ def main(c, exp_name="all", dataset_name=None):
         dropout=c["dropout"],
         device=device,
     )
-    logging.info(model)
+    #logging.info(model)
 
     # WEIGHTED LOSS
     # class_array = (data["train"].dataset["class"] == "school").to_numpy().astype(np.int32)
@@ -90,7 +91,7 @@ def main(c, exp_name="all", dataset_name=None):
         logging.info("\nEpoch {}/{}".format(epoch, n_epochs))
 
         # Train model
-        cnn_utils.train(
+        train_results = cnn_utils.train(
             data_loader["train"],
             model,
             criterion,
@@ -100,6 +101,9 @@ def main(c, exp_name="all", dataset_name=None):
             wandb=wandb,
             logging=logging
         )
+
+        log_string += f"epoch {epoch}:  train F1 = {train_results['f1_score']}, "
+
         # Evauate model
         val_results, val_cm, val_preds = cnn_utils.evaluate(
             data_loader["test"], 
@@ -112,6 +116,8 @@ def main(c, exp_name="all", dataset_name=None):
             logging=logging
         )
         scheduler.step(val_results["f1_score"])
+
+        log_string += f"test F1 = {val_results['f1_score']}\n"
 
         # Save best model so far
         if val_results["f1_score"] > best_score:
@@ -136,6 +142,14 @@ def main(c, exp_name="all", dataset_name=None):
         )
     )
 
+    log_string += "Training complete in {:.0f}m {:.0f}s\n".format(
+            time_elapsed // 60, time_elapsed % 60
+        )
+    log_file = os.path.join(exp_dir, "log.txt")
+    f = open(log_file, "w")
+    f.write(log_string)
+    f.close()
+
     # Load best model
     model_file = os.path.join(exp_dir, f"{exp_name}.pth")
     model.load_state_dict(torch.load(model_file, map_location=device))
@@ -154,7 +168,7 @@ def main(c, exp_name="all", dataset_name=None):
 
 def test(config, exp_name="all", dataset_name=None):
 
-    exp_name = f"{exp_name}_{config['config_name']}"
+    exp_name = f"{dataset_name}_{exp_name}_{c['config_name']}" if dataset_name is not None else f"{exp_name}_{c['config_name']}"
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
 
     phases = ["train", "test"]
@@ -246,7 +260,7 @@ if __name__ == "__main__":
     parser.add_argument("--device", help="device", default="cuda:1")
     parser.add_argument("--test", action='store_true')
     parser.add_argument('-e', "--exp_name", default="all")
-    parser.add_argument('--dataset', default="vietnam")
+    parser.add_argument('--dataset', default="all")
     args = parser.parse_args()
 
     device = torch.device(args.device)
@@ -273,7 +287,7 @@ if __name__ == "__main__":
     'SLE', 'SLV', 'SSD', 'THA', 'TTO', 'UKR', 'UZB', 'VCT', 'VGB', 'ZAF', 
     'ZWE', 'BRA', 
     
-    #'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
+    'KHM', 'LAO', 'IDN', 'PHL', 'MYS', 'MMR', 'BGD', 'BRN'
     ]
     c["iso_codes"] = iso_codes
     iso = iso_codes[0]

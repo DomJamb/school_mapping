@@ -50,18 +50,22 @@ def fetch_satellite_image(bbox):
         "bbox={bbox}&bboxSR=3857&imageSR=3857&size={size}&format=jpeg&f=image"
     )
 
-    size = int(500 * np.sqrt(2))
-    url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
+    size1 = int(500 * np.sqrt(2))
+    #size1 = 500
+    url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size1},{size1}')    
     response = requests.get(url)
     if response.status_code == 200:
         return Image.open(BytesIO(response.content)), True
     
-    size = int(250 * np.sqrt(2))
-    url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size},{size}')    
+    size2 = int(size1 / 2)
+    #size2 = 250
+    url = url_template.format(bbox=",".join(map(str, bbox)), size=f'{size2},{size2}')    
     response = requests.get(url)
     if response.status_code == 200:
         img = Image.open(BytesIO(response.content))
-        img = img.resize((int(500 * np.sqrt(2)), int(500 * np.sqrt(2))), Image.BICUBIC)
+        #img = img.resize((int(500 * np.sqrt(2)), int(500 * np.sqrt(2))), Image.BICUBIC)
+        #img = img.resize(500, 500, Image.BICUBIC)
+        img = img.resize(size1, size1, Image.BICUBIC)
         # TODO: na neki način zabilježiti koji bboxovi su preuzeti na 250x250
         return img, False
 

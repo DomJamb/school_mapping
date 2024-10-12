@@ -37,6 +37,15 @@ def get_image_filepaths(config, data, in_dir=None, ext=".jpeg"):
                 row["class"],
                 file 
             )
+
+            # if not os.path.exists(filepath):
+            #     filepath = os.path.join( 
+            #         config["images_dir"], 
+            #         row["iso"], 
+            #         row["class"],
+            #         "lowres",
+            #         file 
+            #     )
         else:
             filepath = os.path.join(in_dir, file)
         filepaths.append(filepath)

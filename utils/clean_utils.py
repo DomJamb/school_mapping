@@ -536,6 +536,7 @@ def clean_data(config, category, name="clean", source="ms", id="UID"):
                 subdata = subdata[config["columns"]+[name]].reset_index(drop=True)
                 out_subdata = data_utils._concat_data([subdata], out_file=out_subfile)
             
+
             # Read and store the cleaned data
             out_subdata = gpd.read_file(out_subfile).reset_index(drop=True)
             out_subdata.to_file(out_subfile, driver="GeoJSON")
