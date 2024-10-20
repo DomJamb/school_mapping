@@ -12,3 +12,4 @@ exp/
 archive
 output
 models/
+src/lightning_logs

@@ -1,0 +1,17 @@
+test_size: 0.2
+batch_size: 48
+n_workers: 8
+n_epochs: 30
+
+model: "convnext_small"
+pretrained: True
+scheduler: "ReduceLROnPlateau"
+optimizer: "Adam"
+label_smoothing: 0.1
+lr: 0.00001
+img_size: 224
+momentum: 
+gamma: 
+step_size: 
+patience: 7
+dropout: 

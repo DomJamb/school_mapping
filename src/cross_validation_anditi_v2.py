@@ -152,20 +152,40 @@ def main(c, exp_name="all"):
     # Load dataset
     f = os.path.join(exp_dir, "anditi_school.csv")
     data = pd.read_csv(f)
+    n_schools = len(data)
+    
+    assert n_schools == 1003
+
+    with open(os.path.join(exp_dir, "anditi_cluster_1.txt"), "r") as f:
+        cluster_1 = [line.strip() for line in f.readlines() if len(line.strip()) > 0]
+    with open(os.path.join(exp_dir, "anditi_cluster_2.txt"), "r") as f:
+        cluster_2 = [line.strip() for line in f.readlines() if len(line.strip()) > 0]   
+    
+    
     #data = data[data["pred"] >= 0.5]
     dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
-    images_school = []
-    for i in range(len(data)):
-        image_file = f"{dest_dir}/{data.iloc[i]['image']}"
-        images_school.append(image_file)
-    random.shuffle(images_school)
+    #images_school = []
+    #for i in range(len(data)):
+    #    image_file = f"{dest_dir}/{data.iloc[i]['image']}"
+    #    images_school.append(image_file)
+    #       random.shuffle(images_school)
+
+    images_school_1 = []
+    for img in cluster_1:
+        image_file = f"{dest_dir}/{img}.jpeg"
+        images_school_1.append(image_file)
+
+    images_school_2 = []
+    for img in cluster_2:
+        image_file = f"{dest_dir}/{img}.jpeg"
+        images_school_2.append(image_file)
 
     phases = ["train", "test"]
     data, data_loader, classes = cnn_utils.load_dataset(config=c, phases=phases, name = "vietnam")
     data = data["train"].dataset
     data = data[data['class']=="non_school"]
     data = data[data['clean']==0]
-    data = data.sample(n=len(images_school))
+    data = data.sample(n=n_schools)
 
     images_non_school = []
     for i, row in data.iterrows():
@@ -173,8 +193,8 @@ def main(c, exp_name="all"):
         images_non_school.append(image_file)
 
     df1 = pd.DataFrame(columns=["filepath","class"])
-    for i in range(len(images_school)//2):
-        img=images_school[i]
+    for i in range(len(images_school_1)):
+        img=images_school_1[i]
         row = {"filepath":img, "class":"school"}
         df1.loc[len(df1)] = row
     for i in range(len(images_non_school)//2):
@@ -184,8 +204,8 @@ def main(c, exp_name="all"):
     df1.to_csv(os.path.join(crossval_dir, "df1.csv"), index=False)
 
     df2 = pd.DataFrame(columns=["filepath","class"])
-    for i in range(len(images_school)//2, len(images_school)):
-        img=images_school[i]
+    for i in range(len(images_school_2)):
+        img=images_school_2[i]
         row = {"filepath":img, "class":"school"}
         df2.loc[len(df2)] = row
     for i in range(len(images_non_school)//2, len(images_non_school)):

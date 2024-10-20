@@ -8,7 +8,6 @@ import logging
 import data_utils
 import pandas as pd
 
-from torch.utils.data import DataLoader
 import cv2
 import torch
 import torch.nn as nn
@@ -88,16 +87,6 @@ def load_image(image_file, image_size) -> torch.Tensor:
 def compute_embeddings(files, model, image_size):        
     embeddings = []
     ids = []
-<<<<<<< HEAD
-    images = []
-    for file in files:
-        images.append(load_image(file, image_size).to(device))
-        ids.append(Path(file).stem)
-
-    dataloader = DataLoader(images, batch_size=64, shuffle=False)
-
-=======
->>>>>>> 26a281867361b0b523b3c055c152b2a4e6882174
     with torch.no_grad():
         pbar = data_utils._create_progress_bar(files)
         for file in pbar:
@@ -111,10 +100,7 @@ def compute_embeddings(files, model, image_size):
                     _, embedding, _, _ = model(image)
                     embedding = embedding[0, :].cpu().detach().float().numpy().tolist()
                 embeddings.append(embedding)
-<<<<<<< HEAD
-=======
                 ids.append(Path(file).stem)
->>>>>>> 26a281867361b0b523b3c055c152b2a4e6882174
             except:
                 pass
             
