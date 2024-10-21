@@ -185,20 +185,32 @@ def main(c, exp_name="all"):
     data = data["train"].dataset
     data = data[data['class']=="non_school"]
     data = data[data['clean']==0]
-    data = data.sample(n=n_schools)
 
-    images_non_school = []
-    for i, row in data.iterrows():
+    f = os.path.join(exp_dir, "non_schools_cluster_1.csv")
+    cluster_1_ns = pd.read_csv(f)
+    data_ns_c1 = data[data["UID"].isin(cluster_1_ns["UID"])]
+
+    f = os.path.join(exp_dir, "non_schools_cluster_2.csv")
+    cluster_2_ns = pd.read_csv(f)
+    data_ns_c2 = data[data["UID"].isin(cluster_2_ns["UID"])]
+
+    images_non_school_1 = []
+    for i, row in data_ns_c1.iterrows():
         image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
-        images_non_school.append(image_file)
+        images_non_school_1.append(image_file)
+
+    images_non_school_2 = []
+    for i, row in data_ns_c2.iterrows():
+        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+        images_non_school_2.append(image_file)
 
     df1 = pd.DataFrame(columns=["filepath","class"])
     for i in range(len(images_school_1)):
         img=images_school_1[i]
         row = {"filepath":img, "class":"school"}
         df1.loc[len(df1)] = row
-    for i in range(len(images_non_school)//2):
-        img=images_non_school[i]
+    for i in range(len(images_non_school_1)):
+        img=images_non_school_1[i]
         row = {"filepath":img, "class":"non_school"}
         df1.loc[len(df1)] = row
     df1.to_csv(os.path.join(crossval_dir, "df1.csv"), index=False)
@@ -208,8 +220,8 @@ def main(c, exp_name="all"):
         img=images_school_2[i]
         row = {"filepath":img, "class":"school"}
         df2.loc[len(df2)] = row
-    for i in range(len(images_non_school)//2, len(images_non_school)):
-        img=images_non_school[i]
+    for i in range(len(images_non_school_2)):
+        img=images_non_school_2[i]
         row = {"filepath":img, "class":"non_school"}
         df2.loc[len(df2)] = row
     df2.to_csv(os.path.join(crossval_dir, "df2.csv"), index=False)
@@ -279,6 +291,17 @@ def main(c, exp_name="all"):
         if learning_rate < 1e-10:
             break
 
+    train_results1, train_cm, train_preds = cnn_utils.evaluate(
+            data_loader1, 
+            classes, 
+            model1, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+
     val_results1, val_cm, val_preds = cnn_utils.evaluate(
             data_loader2, 
             classes, 
@@ -289,6 +312,10 @@ def main(c, exp_name="all"):
             wandb=wandb, 
             logging=logging
         )
+    
+    train_preds.to_csv(os.path.join(exp_dir, "train_preds1.csv"), index=False)
+    val_preds.to_csv(os.path.join(exp_dir, "val_preds1.csv"), index=False)
+
     #model_file = os.path.join(exp_dir, "model1.pth")
     torch.save(model1.state_dict(), os.path.join(exp_dir, f"crossval_model_1.pth"))
 
@@ -381,6 +408,17 @@ def main(c, exp_name="all"):
         if learning_rate < 1e-10:
             break
 
+    train_results2, train_cm, train_preds = cnn_utils.evaluate(
+            data_loader2, 
+            classes, 
+            model2, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+
     val_results2, val_cm, val_preds = cnn_utils.evaluate(
             data_loader1, 
             classes, 
@@ -391,6 +429,10 @@ def main(c, exp_name="all"):
             wandb=wandb, 
             logging=logging
         )
+    
+    train_preds.to_csv(os.path.join(exp_dir, "train_preds2.csv"), index=False)
+    val_preds.to_csv(os.path.join(exp_dir, "val_preds2.csv"), index=False)
+
     #model_file = os.path.join(exp_dir, "model2.pth")
     torch.save(model2.state_dict(), os.path.join(exp_dir, f"crossval_model_2.pth"))
 
