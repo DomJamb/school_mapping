@@ -49,7 +49,7 @@ from torch.hub import load_state_dict_from_url
 imagenet_mean, imagenet_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 
 def get_state_dict(self, *args, **kwargs):
-    kwargs.pop("check_hash")
+    # kwargs.pop("check_hash")
     return load_state_dict_from_url(self.url, *args, **kwargs)
 WeightsEnum.get_state_dict = get_state_dict
 
