@@ -37,8 +37,8 @@ if __name__ == "__main__":
     centroid1 = (cluster_1_rows["lon"].mean(), cluster_1_rows["lat"].mean())
     centroid2 = (cluster_2_rows["lon"].mean(), cluster_2_rows["lat"].mean())
 
-    print(f"Centroid 1 (lat, lon): {centroid1}")
-    print(f"Centroid 2 (lat, lon): {centroid2}")
+    print(f"Centroid 1 (lon, lat): {centroid1}")
+    print(f"Centroid 2 (lon, lat): {centroid2}")
 
     # Load non schools dataset
     f = os.path.join(cwd, "non_schools.csv")
