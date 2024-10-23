@@ -313,8 +313,8 @@ def main(c, exp_name="all"):
             logging=logging
         )
     
-    train_preds.to_csv(os.path.join(exp_dir, "train_preds1.csv"), index=False)
-    val_preds.to_csv(os.path.join(exp_dir, "val_preds1.csv"), index=False)
+    train_preds.to_csv(os.path.join(exp_dir, "train_preds1.csv"))
+    val_preds.to_csv(os.path.join(exp_dir, "val_preds1.csv"))
 
     #model_file = os.path.join(exp_dir, "model1.pth")
     torch.save(model1.state_dict(), os.path.join(exp_dir, f"crossval_model_1.pth"))
@@ -430,8 +430,8 @@ def main(c, exp_name="all"):
             logging=logging
         )
     
-    train_preds.to_csv(os.path.join(exp_dir, "train_preds2.csv"), index=False)
-    val_preds.to_csv(os.path.join(exp_dir, "val_preds2.csv"), index=False)
+    train_preds.to_csv(os.path.join(exp_dir, "train_preds2.csv"))
+    val_preds.to_csv(os.path.join(exp_dir, "val_preds2.csv"))
 
     #model_file = os.path.join(exp_dir, "model2.pth")
     torch.save(model2.state_dict(), os.path.join(exp_dir, f"crossval_model_2.pth"))
