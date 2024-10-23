@@ -185,6 +185,7 @@ def main(c, exp_name="all"):
     data = data["train"].dataset
     data = data[data['class']=="non_school"]
     data = data[data['clean']==0]
+    data = data.to_crs('EPSG:3857')
 
     f = os.path.join(exp_dir, "non_schools_cluster_1.csv")
     cluster_1_ns = pd.read_csv(f)
@@ -501,6 +502,26 @@ def main(c, exp_name="all"):
     f1_tencrop_avg = (2 * recall_tencrop_avg * precision_tencrop_avg) / (recall_tencrop_avg + precision_tencrop_avg)
     
     results_string = ""
+
+    results_string += f"NORTH -> SOUTH, TRAIN F1: {train_results1['f1_score']}\n"
+    results_string += f"NORTH -> SOUTH, TRAIN PRECISION: {train_results1['precision_score']}\n"
+    results_string += f"NORTH -> SOUTH, TRAIN RECALL: {train_results1['recall_score']}\n"
+    results_string += "\n"
+
+    results_string += f"NORTH -> SOUTH, VAL F1: {val_results1['f1_score']}\n"
+    results_string += f"NORTH -> SOUTH, VAL PRECISION: {val_results1['precision_score']}\n"
+    results_string += f"NORTH -> SOUTH, VAL RECALL: {val_results1['recall_score']}\n"
+    results_string += "\n"
+
+    results_string += f"SOUTH -> NORTH, TRAIN F1: {train_results2['f1_score']}\n"
+    results_string += f"SOUTH -> NORTH, TRAIN PRECISION: {train_results2['precision_score']}\n"
+    results_string += f"SOUTH -> NORTH, TRAIN RECALL: {train_results2['recall_score']}\n"
+    results_string += "\n"
+
+    results_string += f"SOUTH -> NORTH, VAL F1: {val_results2['f1_score']}\n"
+    results_string += f"SOUTH -> NORTH, VAL PRECISION: {val_results2['precision_score']}\n"
+    results_string += f"SOUTH -> NORTH, VAL RECALL: {val_results2['recall_score']}\n"
+    results_string += "\n"
 
     results_string += f"AVG F1: {f1_avg}\n"
     results_string += f"AVG PRECISION: {precision_avg}\n"

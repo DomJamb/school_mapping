@@ -22,7 +22,7 @@ if __name__ == "__main__":
         precision, recall, _ = precision_recall_curve(results["y_true"], results["y_probs_pos"], pos_label=1)
         auc_score = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'Model {i + 1} (AUC = {auc_score:.2f})')
+        plt.plot(recall, precision, label=f'{"North -> South" if i == 0 else "South -> North"} (AUC = {auc_score:.2f})')
 
     plt.legend()
     plt.savefig(os.path.join(cwd, "PR_train.png"))
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         precision, recall, _ = precision_recall_curve(results["y_true"], results["y_probs_pos"], pos_label=1)
         auc_score = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'Model {i + 1} (AUC = {auc_score:.2f})')
+        plt.plot(recall, precision, label=f'{"North -> South" if i == 0 else "South -> North"}  (AUC = {auc_score:.2f})')
 
     plt.legend()
     plt.savefig(os.path.join(cwd, "PR_val.png"))
