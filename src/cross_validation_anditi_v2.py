@@ -235,11 +235,11 @@ def main(c, exp_name="all"):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi")
+    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", c["sampling"])
     if not os.path.exists(crossval_dir):
         os.makedirs(crossval_dir)
 
-    data_dir = os.path.join(exp_dir, f"datasets", c["sampling"])
+    data_dir = os.path.join(crossval_dir, f"data")
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
     
