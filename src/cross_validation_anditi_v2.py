@@ -133,9 +133,7 @@ class SchoolDataset(Dataset):
         return len(self.dataset)
     
 def calculate_euclidean_distance(point_df, point):
-    # Transform geometry string to longitude, latitude tuple
-    point_df = point_df.strip().replace("POINT (", "").replace(")", "")
-    point_df = tuple(map(float, point_df.split()))
+    point_df = np.array([point_df.x, point_df.y])
 
     # Calculate Euclidean distance
     dist =  ((point_df[0] - point[0]) ** 2 + (point_df[1] - point[1]) ** 2) ** 0.5
@@ -143,9 +141,7 @@ def calculate_euclidean_distance(point_df, point):
     return dist
 
 def calculate_bivar_gaussian_pdf(point_df, mean, cov_matrix):
-    # Transform geometry string to longitude, latitude tuple
-    point_df = point_df.strip().replace("POINT (", "").replace(")", "")
-    point_df = np.array(tuple(map(float, point_df.split())))
+    point_df = np.array([point_df.x, point_df.y])
     
     # Calculate bivariate gaussian probability density
     prob_density = multivariate_normal.pdf(point_df, mean, cov_matrix)
