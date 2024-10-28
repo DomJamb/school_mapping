@@ -223,7 +223,7 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
 
     return cluster1_ns, cluster2_ns
 
-def main(c, exp_name="all"):    
+def main(c, exp_name="all", sampling="inverse"):    
     # f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     # data = pd.read_csv(f)
     # dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
@@ -235,7 +235,7 @@ def main(c, exp_name="all"):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", c["sampling"])
+    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", sampling)
     if not os.path.exists(crossval_dir):
         os.makedirs(crossval_dir)
 
@@ -280,7 +280,7 @@ def main(c, exp_name="all"):
     data = data[data['clean']==0]
     data = data.to_crs('EPSG:3857')
 
-    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, data.copy(), c["sampling"])
+    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, data.copy(), sampling)
     data_ns_c1.to_csv(os.path.join(data_dir, "non_schools_cluster_1.csv"))
     data_ns_c2.to_csv(os.path.join(data_dir, "non_schools_cluster_2.csv"))
 
@@ -667,4 +667,4 @@ if __name__ == "__main__":
     config_file = os.path.join(cwd, "configs", "cnn_configs", args.cnn_config + ".yaml")
     c = config_utils.load_config(config_file)
 
-    main(c, args.exp_name)
+    main(c, args.exp_name, args.sampling)
