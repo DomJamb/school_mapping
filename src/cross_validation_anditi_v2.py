@@ -16,6 +16,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import numpy as np
 import pandas as pd
+from scipy.stats import multivariate_normal
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import models, transforms
@@ -130,6 +131,97 @@ class SchoolDataset(Dataset):
         """
         
         return len(self.dataset)
+    
+def calculate_euclidean_distance(point_df, point):
+    # Transform geometry string to longitude, latitude tuple
+    point_df = point_df.strip().replace("POINT (", "").replace(")", "")
+    point_df = tuple(map(float, point_df.split()))
+
+    # Calculate Euclidean distance
+    dist =  ((point_df[0] - point[0]) ** 2 + (point_df[1] - point[1]) ** 2) ** 0.5
+
+    return dist
+
+def calculate_bivar_gaussian_pdf(point_df, mean, cov_matrix):
+    # Transform geometry string to longitude, latitude tuple
+    point_df = point_df.strip().replace("POINT (", "").replace(")", "")
+    point_df = np.array(tuple(map(float, point_df.split())))
+    
+    # Calculate bivariate gaussian probability density
+    prob_density = multivariate_normal.pdf(point_df, mean, cov_matrix)
+
+    return prob_density
+
+def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode='inverse'):
+    # Calculate centroids
+    centroid1 = (cluster_1_rows["lon"].mean(), cluster_1_rows["lat"].mean())
+    centroid2 = (cluster_2_rows["lon"].mean(), cluster_2_rows["lat"].mean())
+
+    print(f'Sampling non-schools using {sampling_mode} method')
+
+    if sampling_mode == 'inverse':
+        # Calculate distance from centroids
+        dataset_ns["c1_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid1))
+        dataset_ns["c2_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid2))
+
+        ### CENTROID 1
+        # Calculate probability to belong to centroid 1 (1 / d1)
+        dataset_ns["c1_prob"] = 1 / (dataset_ns["c1_dist"] + 1e-10)
+        dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
+
+        # Choose nonschools for cluster 1 based on probability 1
+        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
+        cluster1_ns = dataset_ns.loc[cluster1_ns_indices]
+
+        # Remove sampled nonschools
+        dataset_ns = dataset_ns.drop(cluster1_ns_indices)
+
+        ### CENTROID 2
+        # Calculate probability to belong to centroid 2 (1 / d2)
+        dataset_ns["c2_prob"] = 1 / (dataset_ns["c2_dist"] + 1e-10)
+        dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
+
+        # Choose nonschools for cluster 2 based on probability 2
+        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
+        cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
+    elif sampling_mode == 'gaussian':
+        # Calculate variance
+        var1 = (cluster_1_rows["lon"].var(), cluster_1_rows["lat"].var())
+        var2 = (cluster_2_rows["lon"].var(), cluster_2_rows["lat"].var())
+
+        # Calculate covariance matrices
+        cov_matrix1 = np.array([
+            [2 * var1[0], 0]
+            [0, 2 * var1[1]]
+        ])
+
+        cov_matrix2 = np.array([
+            [2 * var2[0], 0]
+            [0, 2 * var2[1]]
+        ])
+
+        ### CENTROID 1
+        # Calculate probability to belong to centroid 1 (bivariate Gaussian)
+        dataset_ns["c1_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid1, cov_matrix1))
+        dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
+
+        # Choose nonschools for cluster 1 based on probability 1
+        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
+        cluster1_ns = dataset_ns.loc[cluster1_ns_indices]
+
+        # Remove sampled nonschools
+        dataset_ns = dataset_ns.drop(cluster1_ns_indices)
+
+        ### CENTROID 2
+        # Calculate probability to belong to centroid 2 (bivariate Gaussian)
+        dataset_ns["c2_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid2, cov_matrix2))
+        dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
+
+        # Choose nonschools for cluster 2 based on probability 2
+        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
+        cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
+
+    return cluster1_ns, cluster2_ns
 
 def main(c, exp_name="all"):    
     # f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
@@ -146,6 +238,10 @@ def main(c, exp_name="all"):
     crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi")
     if not os.path.exists(crossval_dir):
         os.makedirs(crossval_dir)
+
+    data_dir = os.path.join(exp_dir, f"datasets", c["sampling"])
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
     
     results_string = ""
     
@@ -160,15 +256,12 @@ def main(c, exp_name="all"):
         cluster_1 = [line.strip() for line in f.readlines() if len(line.strip()) > 0]
     with open(os.path.join(exp_dir, "anditi_cluster_2.txt"), "r") as f:
         cluster_2 = [line.strip() for line in f.readlines() if len(line.strip()) > 0]   
+
+    # Filter dataframe for each cluster
+    cluster_1_rows = data.loc[data["image"].isin([f"{img_id}.jpeg" for img_id in cluster_1])]
+    cluster_2_rows = data.loc[data["image"].isin([f"{img_id}.jpeg" for img_id in cluster_2])]
     
-    
-    #data = data[data["pred"] >= 0.5]
     dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
-    #images_school = []
-    #for i in range(len(data)):
-    #    image_file = f"{dest_dir}/{data.iloc[i]['image']}"
-    #    images_school.append(image_file)
-    #       random.shuffle(images_school)
 
     images_school_1 = []
     for img in cluster_1:
@@ -187,13 +280,9 @@ def main(c, exp_name="all"):
     data = data[data['clean']==0]
     data = data.to_crs('EPSG:3857')
 
-    f = os.path.join(exp_dir, "non_schools_cluster_1.csv")
-    cluster_1_ns = pd.read_csv(f)
-    data_ns_c1 = data[data["UID"].isin(cluster_1_ns["UID"])]
-
-    f = os.path.join(exp_dir, "non_schools_cluster_2.csv")
-    cluster_2_ns = pd.read_csv(f)
-    data_ns_c2 = data[data["UID"].isin(cluster_2_ns["UID"])]
+    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, data.copy(), c["sampling"])
+    data_ns_c1.to_csv(os.path.join(data_dir, "non_schools_cluster_1.csv"))
+    data_ns_c2.to_csv(os.path.join(data_dir, "non_schools_cluster_2.csv"))
 
     images_non_school_1 = []
     for i, row in data_ns_c1.iterrows():
@@ -566,6 +655,7 @@ def main(c, exp_name="all"):
 if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
+    parser.add_argument("--sampling", help="Chosen non-school sampling method", default="inverse")
     parser.add_argument("--cnn_config", help="Config file", default="convnext_small")
     parser.add_argument('-d', "--device", help="device", default="cuda:0")
     parser.add_argument('-e', "--exp_name", default="global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large")
