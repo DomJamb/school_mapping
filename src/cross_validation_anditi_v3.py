@@ -148,76 +148,39 @@ def calculate_bivar_gaussian_pdf(point_df, mean, cov_matrix):
 
     return prob_density
 
-def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode='inverse'):
-    # Calculate centroids
-    centroid1 = (cluster_1_rows["lon"].mean(), cluster_1_rows["lat"].mean())
-    centroid2 = (cluster_2_rows["lon"].mean(), cluster_2_rows["lat"].mean())
+def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse'):
+    dataset_ns = data_ns.copy()
 
-    print(f'Sampling non-schools using {sampling_mode} method')
+    # Calculate centroid
+    centroid = (cluster_rows["lon"].mean(), cluster_rows["lat"].mean())
 
     if sampling_mode == 'inverse':
-        # Calculate distance from centroids
-        dataset_ns["c1_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid1))
-        dataset_ns["c2_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid2))
+        # Calculate distance from centroid
+        dataset_ns["cluster_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid))
 
-        ### CENTROID 1
-        # Calculate probability to belong to centroid 1 (1 / d1)
-        dataset_ns["c1_prob"] = 1 / (dataset_ns["c1_dist"] + 1e-10)
-        dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
-
-        # Choose nonschools for cluster 1 based on probability 1
-        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
-        cluster1_ns = dataset_ns.loc[cluster1_ns_indices]
-
-        # Remove sampled nonschools
-        dataset_ns = dataset_ns.drop(cluster1_ns_indices)
-
-        ### CENTROID 2
-        # Calculate probability to belong to centroid 2 (1 / d2)
-        dataset_ns["c2_prob"] = 1 / (dataset_ns["c2_dist"] + 1e-10)
-        dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
-
-        # Choose nonschools for cluster 2 based on probability 2
-        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
-        cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
+        # Calculate probability to belong to centroid (1 / d)
+        dataset_ns["cluster_prob"] = 1 / (dataset_ns["cluster_dist"] + 1e-10)
+        dataset_ns["cluster_prob"] = dataset_ns["cluster_prob"] / dataset_ns["cluster_prob"].sum()
     elif sampling_mode == 'gaussian':
         # Calculate variance
-        var1 = (cluster_1_rows["lon"].var(), cluster_1_rows["lat"].var())
-        var2 = (cluster_2_rows["lon"].var(), cluster_2_rows["lat"].var())
+        var = (cluster_rows["lon"].var(), cluster_rows["lat"].var())
 
-        # Calculate covariance matrices
-        cov_matrix1 = np.array([
-            [2 * var1[0], 0],
-            [0, 2 * var1[1]]
+        # Calculate covariance matrix
+        cov_matrix = np.array([
+            [2 * var[0], 0],
+            [0, 2 * var[1]]
         ])
 
-        cov_matrix2 = np.array([
-            [2 * var2[0], 0],
-            [0, 2 * var2[1]]
-        ])
+        # Calculate probability to belong to centroid (bivariate Gaussian)
+        dataset_ns["cluster_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid, cov_matrix))
+        dataset_ns["cluster_prob"] = dataset_ns["cluster_prob"] / dataset_ns["cluster_prob"].sum()
 
-        ### CENTROID 1
-        # Calculate probability to belong to centroid 1 (bivariate Gaussian)
-        dataset_ns["c1_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid1, cov_matrix1))
-        dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
+    # Choose nonschools for cluster based on probability
+    cluster_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_rows), replace=False, p=dataset_ns["cluster_prob"])
+    cluster_ns = dataset_ns.loc[cluster_ns_indices]
 
-        # Choose nonschools for cluster 1 based on probability 1
-        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
-        cluster1_ns = dataset_ns.loc[cluster1_ns_indices]
 
-        # Remove sampled nonschools
-        dataset_ns = dataset_ns.drop(cluster1_ns_indices)
-
-        ### CENTROID 2
-        # Calculate probability to belong to centroid 2 (bivariate Gaussian)
-        dataset_ns["c2_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid2, cov_matrix2))
-        dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
-
-        # Choose nonschools for cluster 2 based on probability 2
-        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
-        cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
-
-    return cluster1_ns, cluster2_ns
+    return cluster_ns
 
 def main(c, exp_name="all", sampling="inverse"):    
     # f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
@@ -276,19 +239,13 @@ def main(c, exp_name="all", sampling="inverse"):
     data = data[data['clean']==0]
     data = data.to_crs('EPSG:3857')
 
-    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, data.copy(), sampling)
-    data_ns_c1.to_csv(os.path.join(data_dir, "non_schools_cluster_1.csv"))
-    data_ns_c2.to_csv(os.path.join(data_dir, "non_schools_cluster_2.csv"))
+    data_ns_c1 = sample_non_schools(cluster_1_rows, data, sampling)
+    data_ns_c1.to_csv(os.path.join(data_dir, "ep1_non_schools_cluster_1.csv"))
 
     images_non_school_1 = []
     for i, row in data_ns_c1.iterrows():
         image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
         images_non_school_1.append(image_file)
-
-    images_non_school_2 = []
-    for i, row in data_ns_c2.iterrows():
-        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
-        images_non_school_2.append(image_file)
 
     df1 = pd.DataFrame(columns=["filepath","class"])
     for i in range(len(images_school_1)):
@@ -299,7 +256,23 @@ def main(c, exp_name="all", sampling="inverse"):
         img=images_non_school_1[i]
         row = {"filepath":img, "class":"non_school"}
         df1.loc[len(df1)] = row
-    df1.to_csv(os.path.join(crossval_dir, "df1.csv"), index=False)
+
+    dataset1 = SchoolDataset(df1, classes_dict, train_transform)
+    data_loader1 = torch.utils.data.DataLoader(
+            dataset1,
+            batch_size=c["batch_size"],
+            num_workers=c["n_workers"],
+            shuffle=True,
+            drop_last=False
+        )
+
+    data_ns_c2 = sample_non_schools(cluster_2_rows, data, sampling)
+    data_ns_c2.to_csv(os.path.join(data_dir, "ep1_non_schools_cluster_2.csv"))
+
+    images_non_school_2 = []
+    for i, row in data_ns_c2.iterrows():
+        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+        images_non_school_2.append(image_file)
 
     df2 = pd.DataFrame(columns=["filepath","class"])
     for i in range(len(images_school_2)):
@@ -311,17 +284,6 @@ def main(c, exp_name="all", sampling="inverse"):
         row = {"filepath":img, "class":"non_school"}
         df2.loc[len(df2)] = row
     df2.to_csv(os.path.join(crossval_dir, "df2.csv"), index=False)
-
-
-
-    dataset1 = SchoolDataset(df1, classes_dict, train_transform)
-    data_loader1 = torch.utils.data.DataLoader(
-            dataset1,
-            batch_size=c["batch_size"],
-            num_workers=c["n_workers"],
-            shuffle=True,
-            drop_last=False
-        )
     
     dataset2 = SchoolDataset(df2, classes_dict, train_transform)
     data_loader2 = torch.utils.data.DataLoader(
@@ -357,6 +319,38 @@ def main(c, exp_name="all", sampling="inverse"):
     model1 = model1.to(device)
 
     for epoch in range(1, n_epochs + 1):
+        if epoch > 1:
+            # Sample non-schools
+            data_ns_c1 = sample_non_schools(cluster_1_rows, data, sampling)
+            data_ns_c1.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_1.csv"))
+
+            # Find non-school files
+            images_non_school_1 = []
+            for i, row in data_ns_c1.iterrows():
+                image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+                images_non_school_1.append(image_file)
+
+            # Create dataframe
+            df1 = pd.DataFrame(columns=["filepath","class"])
+            for i in range(len(images_school_1)):
+                img=images_school_1[i]
+                row = {"filepath":img, "class":"school"}
+                df1.loc[len(df1)] = row
+            for i in range(len(images_non_school_1)):
+                img=images_non_school_1[i]
+                row = {"filepath":img, "class":"non_school"}
+                df1.loc[len(df1)] = row
+
+            # Create dataset and data loader
+            dataset1 = SchoolDataset(df1, classes_dict, train_transform)
+            data_loader1 = torch.utils.data.DataLoader(
+                    dataset1,
+                    batch_size=c["batch_size"],
+                    num_workers=c["n_workers"],
+                    shuffle=True,
+                    drop_last=False
+                )
+    
         logging.info("\nModel 1, Epoch {}/{}".format(epoch, n_epochs))
 
         # Train model
@@ -474,6 +468,35 @@ def main(c, exp_name="all", sampling="inverse"):
     model2.load_state_dict(torch.load(model_file, map_location=device))
     model2 = model2.to(device)
     for epoch in range(1, n_epochs + 1):
+        if epoch > 1:
+            data_ns_c2 = sample_non_schools(cluster_2_rows, data, sampling)
+            data_ns_c2.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_2.csv"))
+
+            images_non_school_2 = []
+            for i, row in data_ns_c2.iterrows():
+                image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+                images_non_school_2.append(image_file)
+
+            df2 = pd.DataFrame(columns=["filepath","class"])
+            for i in range(len(images_school_2)):
+                img=images_school_2[i]
+                row = {"filepath":img, "class":"school"}
+                df2.loc[len(df2)] = row
+            for i in range(len(images_non_school_2)):
+                img=images_non_school_2[i]
+                row = {"filepath":img, "class":"non_school"}
+                df2.loc[len(df2)] = row
+            df2.to_csv(os.path.join(crossval_dir, "df2.csv"), index=False)
+            
+            dataset2 = SchoolDataset(df2, classes_dict, train_transform)
+            data_loader2 = torch.utils.data.DataLoader(
+                    dataset2,
+                    batch_size=c["batch_size"],
+                    num_workers=c["n_workers"],
+                    shuffle=True,
+                    drop_last=False
+                )
+    
         logging.info("\nModel 2, Epoch {}/{}".format(epoch, n_epochs))
 
         # Train model
