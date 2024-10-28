@@ -191,12 +191,12 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
 
         # Calculate covariance matrices
         cov_matrix1 = np.array([
-            [2 * var1[0], 0]
+            [2 * var1[0], 0],
             [0, 2 * var1[1]]
         ])
 
         cov_matrix2 = np.array([
-            [2 * var2[0], 0]
+            [2 * var2[0], 0],
             [0, 2 * var2[1]]
         ])
 
