@@ -194,7 +194,7 @@ def main(c, exp_name="all", sampling="inverse"):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", sampling)
+    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", "dynamic", sampling)
     if not os.path.exists(crossval_dir):
         os.makedirs(crossval_dir)
 
@@ -447,6 +447,11 @@ def main(c, exp_name="all", sampling="inverse"):
         elif pred_tencrop == 0 and row['class'] == 'non_school':
             model1_tencrop_results[3] += 1
 
+    # Delete model to free up CUDA memory
+    del model1
+    del optimizer
+    del scheduler
+    torch.cuda.empty_cache()
     
     # SECOND PASS
     log_string_2 = ""
@@ -592,6 +597,12 @@ def main(c, exp_name="all", sampling="inverse"):
             model2_tencrop_results[2] += 1
         elif pred_tencrop == 0 and row['class'] == 'non_school':
             model2_tencrop_results[3] += 1
+
+    # Delete model to free up CUDA memory
+    del model2
+    del optimizer
+    del scheduler
+    torch.cuda.empty_cache()
     
     f1_avg = (val_results1["f1_score"] + val_results2["f1_score"]) / 2
     precision_avg = (val_results1["precision_score"] + val_results2["precision_score"]) / 2
