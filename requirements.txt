@@ -4,7 +4,7 @@ easydict==1.11
 eeconvert==0.1.22
 folium==0.14.0
 geojson==3.1.0
-geopandas==0.14.0
+geopandas
 ipython==8.17.2
 matplotlib==3.8.1
 networkx==3.2.1
@@ -22,3 +22,11 @@ scipy==1.11.3
 tqdm==4.65.0
 wxee==0.4.1
 xarray==2023.10.1
+torch
+huggingface_hub
+lightning
+json_fix
+wandb
+lightgbm
+xgboost
+scikit-learn-intelex
