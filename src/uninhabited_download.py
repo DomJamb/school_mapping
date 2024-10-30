@@ -64,7 +64,7 @@ def download_sat_images(
     """
     
     data = pd.read_csv("/home/agorup/school_mapping/src/uninhabited_tiles_train.csv")
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school'
 
     tasks = []
     for i, row in data.iterrows():

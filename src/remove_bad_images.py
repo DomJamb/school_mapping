@@ -1,6 +1,6 @@
 import os
 
-dir = "/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school"
+dir = "/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school"
 for i in range(2000):
     img_path = os.path.join(dir, f"VNM-UNINHABITED-{i}.jpeg")
 

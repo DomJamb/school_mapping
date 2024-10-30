@@ -26,15 +26,15 @@ def pickleToDataframe(data):
     return df
 
 def main():    
-    # f1 = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
-    # f1f = "/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px_filtered_ghsl.pkl"
-    # f_df = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_unfiltered.csv"
-    # f2 = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
+    # f1 = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
+    # f1f = "/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px_filtered_ghsl.pkl"
+    # f_df = "/mnt/sdb/agorup/school_mapping/inference_data/inference_unfiltered.csv"
+    # f2 = "/mnt/sdb/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
 
-    f1 = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857.pkl", 'rb')
-    f1f = "/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857_filtered_ghsl.pkl"
-    f_df = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_overlap_unfiltered.csv"
-    f2 = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_overlap_filtered_ghsl.csv"
+    f1 = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857.pkl", 'rb')
+    f1f = "/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857_filtered_ghsl.pkl"
+    f_df = "/mnt/sdb/agorup/school_mapping/inference_data/inference_overlap_unfiltered.csv"
+    f2 = "/mnt/sdb/agorup/school_mapping/inference_data/inference_overlap_filtered_ghsl.csv"
 
     # if(os.path.exists(f2)):
     #     df = pd.read_csv(f2)
@@ -53,7 +53,7 @@ def main():
         data.to_csv(f_df)
     else:
         data = pd.read_csv(f_df)
-    ghsl_path = "/mnt/ssd1/agorup/school_mapping/rasters/ghsl/GHS_BUILT_C_FUN_E2018_GLOBE_R2023A_54009_10_V1_0.tif"
+    ghsl_path = "/mnt/sdb/agorup/school_mapping/rasters/ghsl/GHS_BUILT_C_FUN_E2018_GLOBE_R2023A_54009_10_V1_0.tif"
     data["geometry"] = data.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
     data = gpd.GeoDataFrame(data, geometry="geometry", crs="EPSG:3857")
 

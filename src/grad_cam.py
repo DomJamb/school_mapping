@@ -21,7 +21,7 @@ size = 224
 
 if __name__ == "__main__":
     device = "cuda:0"
-    images_dir = "/mnt/ssd1/agorup/school_mapping/satellite_images"
+    images_dir = "/mnt/sdb/agorup/school_mapping/satellite_images"
 
     cwd = os.path.dirname(os.getcwd())
     config_file = os.path.join(cwd, "configs", "cnn_configs", "resnet18.yaml")

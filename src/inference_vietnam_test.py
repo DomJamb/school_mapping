@@ -75,10 +75,10 @@ class SchoolDataset(Dataset):
         return len(self.dataset)
 
 def inference(c, exp, finetune): 
-    # f = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
-    # dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference/large'
-    f = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference/large'
+    # f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
+    # dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference/large'
+    f = "/mnt/sdb/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference/large'
     images = []
 
     # data = pickle.load(f)

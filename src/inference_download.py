@@ -63,10 +63,10 @@ def download_sat_images(
     - None
     """
     
-    f = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857.pkl", 'rb')
+    f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857.pkl", 'rb')
     data = pickle.load(f)
 
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference_overlap/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference_overlap/large'
 
     tasks = []
     for district in data:

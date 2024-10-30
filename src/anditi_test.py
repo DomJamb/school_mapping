@@ -66,9 +66,9 @@ def inference(c, exp, finetune):
     - None
     """
     
-    f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
+    f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     data = pd.read_csv(f)
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
 
     images_school = []
     for i in range(len(data)):
@@ -143,7 +143,7 @@ def inference(c, exp, finetune):
 
     images_non_school = []
     for i, row in data.iterrows():
-        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/VNM/non_school/{row['UID']}.jpeg"
+        image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/VNM/non_school/{row['UID']}.jpeg"
         images_non_school.append(image_file)
 
     preds_non_school = []

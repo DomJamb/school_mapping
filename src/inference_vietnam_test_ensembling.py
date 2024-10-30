@@ -126,9 +126,9 @@ def inference(c, exp, finetune, device="cuda:0"):
     - None
     """
     
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference/large'
 
-    # f = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
+    # f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
     # data = pickle.load(f)
     # images = []
     # for district in data:
@@ -137,7 +137,7 @@ def inference(c, exp, finetune, device="cuda:0"):
     #         images.append(image_file)
 
     
-    f = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
+    f = "/mnt/sdb/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
     df = pd.read_csv(f)
     data = df
     images = []

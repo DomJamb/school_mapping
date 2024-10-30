@@ -64,7 +64,7 @@ def get_images(c, category=1, n=10):
     - None
     """
 
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference'
     out_file = os.path.join("inference_vietnam_difference.csv")
 
 

@@ -25,10 +25,10 @@ def pickleToDataframe(data):
     return df
 
 def main():    
-    f1 = open("/mnt/ssd1/agorup/school_mapping/inference_data/vietnam_bboxes_3857.pkl", 'rb')
+    f1 = open("/mnt/sdb/agorup/school_mapping/inference_data/vietnam_bboxes_3857.pkl", 'rb')
     f2 = "/home/agorup/school_mapping/data/vectors/train/vietnam_train.geojson"
-    #f_df = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_unfiltered.csv"
-    #f2 = "/mnt/ssd1/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
+    #f_df = "/mnt/sdb/agorup/school_mapping/inference_data/inference_unfiltered.csv"
+    #f2 = "/mnt/sdb/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
 
     # if(os.path.exists(f2)):
     #     df = pd.read_csv(f2)
@@ -46,11 +46,11 @@ def main():
     data = pickleToDataframe(data)
     vietnam_dataset = gpd.read_file(f2)
          
-    ghsl_path = "/mnt/ssd1/agorup/school_mapping/rasters/ghsl/GHS_BUILT_C_FUN_E2018_GLOBE_R2023A_54009_10_V1_0.tif"
+    ghsl_path = "/mnt/sdb/agorup/school_mapping/rasters/ghsl/GHS_BUILT_C_FUN_E2018_GLOBE_R2023A_54009_10_V1_0.tif"
     
     #data = gpd.GeoDataFrame(data, geometry="geometry", crs="EPSG:3857")
 
-    images_folder = "/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school"
+    images_folder = "/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school"
     uninhabited_tiles = []
     uninhabited_tiles_df = pd.DataFrame(columns=["UID", "lon", "lat"])
 

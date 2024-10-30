@@ -60,9 +60,9 @@ def download_sat_images(
     - None
     """
     
-    f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
+    f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     data = pd.read_csv(f)
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 

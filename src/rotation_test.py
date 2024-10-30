@@ -2,7 +2,7 @@ from PIL import Image
 from torchvision import models, transforms
 
 if __name__ == "__main__":
-    filepath = "/mnt/ssd1/agorup/school_mapping/satellite_images/large/BWA/school/lowres/OSM-BWA-SCHOOL-00000000.jpeg"
+    filepath = "/mnt/sdb/agorup/school_mapping/satellite_images/large/BWA/school/lowres/OSM-BWA-SCHOOL-00000000.jpeg"
     image = Image.open(filepath).convert("RGB")
 
     t = transforms.Compose(

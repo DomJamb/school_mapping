@@ -86,10 +86,10 @@ def get_images(c, exp, finetune="", n=10):
     - None
     """
     
-    f = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
+    f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
     data = pickle.load(f)
 
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference'
 
     cwd = os.path.dirname(os.getcwd())
     exp_name = f"{exp}_{c['config_name']}"

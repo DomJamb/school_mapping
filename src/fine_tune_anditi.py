@@ -93,9 +93,9 @@ class SchoolDataset(Dataset):
         return len(self.dataset)
 
 def main(c, exp_name="all", finetune=""):    
-    # f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
+    # f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     # data = pd.read_csv(f)
-    # dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
+    # dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
 
     cwd = os.path.dirname(os.getcwd())
     exp_name = f"{exp_name}_{c['config_name']}"
@@ -114,7 +114,7 @@ def main(c, exp_name="all", finetune=""):
     #f = "/home/agorup/school_mapping/exp/global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large/anditi_school.csv"
     data = pd.read_csv(f)
     data = data[data["pred"] >= 0.5]
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
     images_school = []
     for i in range(len(data)):
         image_file = f"{dest_dir}/{data.iloc[i]['image']}"
@@ -136,7 +136,7 @@ def main(c, exp_name="all", finetune=""):
 
     images_non_school = []
     for i, row in data.iterrows():
-        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+        image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
         images_non_school.append(image_file)
 
     df = pd.DataFrame(columns=["filepath","class"])

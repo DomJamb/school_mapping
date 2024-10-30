@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pickle
 
-f = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857.pkl","rb")
+f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes-overlapping_3857.pkl","rb")
 data = pickle.load(f)
 
 adjacency_data = {}
@@ -25,7 +25,7 @@ for district in data:
                 adjacent_tiles.append(f"{district}-{index2}")
         adjacency_data[f"{district}-{index1}"] = adjacent_tiles
 
-with open("/mnt/ssd1/agorup/school_mapping/inference_data/adjacency_data_overlapping.pkl", "wb") as handle:
+with open("/mnt/sdb/agorup/school_mapping/inference_data/adjacency_data_overlapping.pkl", "wb") as handle:
     pickle.dump(adjacency_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 print("done")

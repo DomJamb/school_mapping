@@ -183,9 +183,9 @@ def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse'):
     return cluster_ns
 
 def main(c, exp_name="all", sampling="inverse"):    
-    # f = "/mnt/ssd1/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
+    # f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     # data = pd.read_csv(f)
-    # dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
+    # dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
 
     cwd = os.path.dirname(os.getcwd())
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
@@ -220,7 +220,7 @@ def main(c, exp_name="all", sampling="inverse"):
     cluster_1_rows = data.loc[data["image"].isin([f"{img_id}.jpeg" for img_id in cluster_1])]
     cluster_2_rows = data.loc[data["image"].isin([f"{img_id}.jpeg" for img_id in cluster_2])]
     
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/anditi/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
 
     images_school_1 = []
     for img in cluster_1:
@@ -244,7 +244,7 @@ def main(c, exp_name="all", sampling="inverse"):
 
     images_non_school_1 = []
     for i, row in data_ns_c1.iterrows():
-        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+        image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
         images_non_school_1.append(image_file)
 
     df1 = pd.DataFrame(columns=["filepath","class"])
@@ -271,7 +271,7 @@ def main(c, exp_name="all", sampling="inverse"):
 
     images_non_school_2 = []
     for i, row in data_ns_c2.iterrows():
-        image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+        image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
         images_non_school_2.append(image_file)
 
     df2 = pd.DataFrame(columns=["filepath","class"])
@@ -327,7 +327,7 @@ def main(c, exp_name="all", sampling="inverse"):
             # Find non-school files
             images_non_school_1 = []
             for i, row in data_ns_c1.iterrows():
-                image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+                image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
                 images_non_school_1.append(image_file)
 
             # Create dataframe
@@ -474,7 +474,7 @@ def main(c, exp_name="all", sampling="inverse"):
 
             images_non_school_2 = []
             for i, row in data_ns_c2.iterrows():
-                image_file = f"/mnt/ssd1/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+                image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
                 images_non_school_2.append(image_file)
 
             df2 = pd.DataFrame(columns=["filepath","class"])

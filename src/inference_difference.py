@@ -63,10 +63,10 @@ def get_images(c):
     Returns:
     - None
     """
-    f = open("/mnt/ssd1/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
+    f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
     data = pickle.load(f)
 
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference'
 
     images = []
     for district in data:
@@ -74,7 +74,7 @@ def get_images(c):
             image_file = f"{dest_dir}/{district}/{index}.jpeg"
             images.append(image_file)
 
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images/inference'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference'
 
     cwd = os.path.dirname(os.getcwd())
     exp_dir1 = os.path.join(cwd, c["exp_dir"], "global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small", "fine_tune_vietnam")

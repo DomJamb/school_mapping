@@ -113,7 +113,7 @@ def download_sat_images(
     #             #logging.info(e)
     #             pass
 
-    dest_dir = '/mnt/ssd1/agorup/school_mapping/satellite_images'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images'
 
     tasks = []
     for index in range(len(data)):
