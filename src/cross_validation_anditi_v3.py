@@ -399,6 +399,7 @@ def main(c, exp_name="all", sampling="inverse"):
     #model_file = os.path.join(exp_dir, "model1.pth")
     torch.save(model1.state_dict(), os.path.join(exp_dir, f"crossval_model_1.pth"))
 
+    """
     model1_rotation_results = np.zeros(4)
     model1_tencrop_results = np.zeros(4)
     for i in tqdm(range(len(df2))):
@@ -446,8 +447,9 @@ def main(c, exp_name="all", sampling="inverse"):
             model1_tencrop_results[2] += 1
         elif pred_tencrop == 0 and row['class'] == 'non_school':
             model1_tencrop_results[3] += 1
+    """
 
-    # Delete model to free up CUDA memory
+    # Free up CUDA memory
     del model1
     del optimizer
     del scheduler
@@ -550,6 +552,7 @@ def main(c, exp_name="all", sampling="inverse"):
     #model_file = os.path.join(exp_dir, "model2.pth")
     torch.save(model2.state_dict(), os.path.join(exp_dir, f"crossval_model_2.pth"))
 
+    """
     model2_rotation_results = np.zeros(4)
     model2_tencrop_results = np.zeros(4)
     for i in tqdm(range(len(df1))):
@@ -597,8 +600,9 @@ def main(c, exp_name="all", sampling="inverse"):
             model2_tencrop_results[2] += 1
         elif pred_tencrop == 0 and row['class'] == 'non_school':
             model2_tencrop_results[3] += 1
+    """
 
-    # Delete model to free up CUDA memory
+    # Free up CUDA memory
     del model2
     del optimizer
     del scheduler
@@ -608,6 +612,7 @@ def main(c, exp_name="all", sampling="inverse"):
     precision_avg = (val_results1["precision_score"] + val_results2["precision_score"]) / 2
     recall_avg = (val_results1["recall_score"] + val_results2["recall_score"]) / 2
 
+    """
     recall_rotation_avg = ((model1_rotation_results[0] / (model1_rotation_results[0] + model1_rotation_results[1])) + 
                            (model2_rotation_results[0] / (model2_rotation_results[0] + model2_rotation_results[1]))) / 2
     precision_rotation_avg = ((model1_rotation_results[0] / (model1_rotation_results[0] + model1_rotation_results[2])) + 
@@ -619,6 +624,7 @@ def main(c, exp_name="all", sampling="inverse"):
     precision_tencrop_avg = ((model1_tencrop_results[0] / (model1_tencrop_results[0] + model1_tencrop_results[2])) + 
                            (model2_tencrop_results[0] / (model2_tencrop_results[0] + model2_tencrop_results[2]))) / 2
     f1_tencrop_avg = (2 * recall_tencrop_avg * precision_tencrop_avg) / (recall_tencrop_avg + precision_tencrop_avg)
+    """
     
     results_string = ""
 
@@ -646,6 +652,8 @@ def main(c, exp_name="all", sampling="inverse"):
     results_string += f"AVG PRECISION: {precision_avg}\n"
     results_string += f"AVG RECALL: {recall_avg}\n"
     results_string += "\n"
+
+    """
     results_string += f"AVG F1 ROTATION: {f1_rotation_avg}\n"
     results_string += f"AVG PRECISION ROTATION: {precision_rotation_avg}\n"
     results_string += f"AVG RECALL ROTATION: {recall_rotation_avg}\n"
@@ -658,6 +666,7 @@ def main(c, exp_name="all", sampling="inverse"):
     results_string += f"model1_tencrop_results: {model1_tencrop_results}\n"
     results_string += f"model2_rotation_results: {model2_rotation_results}\n"
     results_string += f"model2_tencrop_results: {model2_tencrop_results}"
+    """
 
     print(results_string)
 
