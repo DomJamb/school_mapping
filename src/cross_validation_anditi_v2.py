@@ -17,6 +17,7 @@ import torch.nn as nn
 import numpy as np
 import pandas as pd
 from scipy.stats import multivariate_normal
+from sklearn.metrics import precision_recall_curve, auc
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import models, transforms
@@ -24,6 +25,7 @@ import copy
 import random
 import numpy
 import torch.nn.functional as nnf
+import matplotlib.pyplot as plt
 
 # Get device
 cwd = os.path.dirname(os.getcwd())
@@ -218,6 +220,49 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
         cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
 
     return cluster1_ns, cluster2_ns
+
+def plot_pr(preds_path, save_path):
+    # Train PR curve
+    plt.figure(figsize=(8,6))
+    plt.title('Precision-Recall Curve, Train')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+
+    for i, file_name in enumerate(["train_preds1.csv", "train_preds2.csv"]):
+        f = os.path.join(preds_path, file_name)
+        results = pd.read_csv(f)
+
+        # Set positive class probs
+        results["y_probs_pos"] = results.apply(lambda row: row["y_probs"] if row["y_preds"] == 1 else 1 - row["y_probs"], axis=1)
+
+        precision, recall, _ = precision_recall_curve(results["y_true"], results["y_probs_pos"], pos_label=1)
+        auc_score = auc(recall, precision)
+
+        plt.plot(recall, precision, label=f'{"North -> South" if i == 0 else "South -> North"} (AUC = {auc_score:.2f})')
+
+    plt.legend()
+    plt.savefig(os.path.join(save_path, "PR_train.png"))
+
+    # Val PR curve
+    plt.figure(figsize=(8,6))
+    plt.title('Precision-Recall Curve, Val')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+
+    for i, file_name in enumerate(["val_preds1.csv", "val_preds2.csv"]):
+        f = os.path.join(preds_path, file_name)
+        results = pd.read_csv(f)
+
+        # Set positive class probs
+        results["y_probs_pos"] = results.apply(lambda row: row["y_probs"] if row["y_preds"] == 1 else 1 - row["y_probs"], axis=1)
+
+        precision, recall, _ = precision_recall_curve(results["y_true"], results["y_probs_pos"], pos_label=1)
+        auc_score = auc(recall, precision)
+
+        plt.plot(recall, precision, label=f'{"North -> South" if i == 0 else "South -> North"}  (AUC = {auc_score:.2f})')
+
+    plt.legend()
+    plt.savefig(os.path.join(save_path, "PR_val.png"))
 
 def main(c, exp_name="all", sampling="inverse"):    
     # f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
@@ -657,6 +702,7 @@ def main(c, exp_name="all", sampling="inverse"):
     f.write(results_string)
     f.close()
 
+    plot_pr(crossval_dir, crossval_dir)
     
     # Terminate trackers
     time_elapsed = time.time() - since
