@@ -179,7 +179,6 @@ def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse'):
     cluster_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_rows), replace=False, p=dataset_ns["cluster_prob"])
     cluster_ns = dataset_ns.loc[cluster_ns_indices]
 
-
     return cluster_ns
 
 def main(c, exp_name="all", sampling="inverse"):    
@@ -320,6 +319,11 @@ def main(c, exp_name="all", sampling="inverse"):
 
     for epoch in range(1, n_epochs + 1):
         if epoch > 1:
+            # Delete previous dataset and dataloader
+            del dataset1
+            del data_loader1
+            torch.cuda.empty_cache()
+
             # Sample non-schools
             data_ns_c1 = sample_non_schools(cluster_1_rows, data, sampling)
             data_ns_c1.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_1.csv"))
@@ -393,11 +397,11 @@ def main(c, exp_name="all", sampling="inverse"):
             logging=logging
         )
     
-    train_preds.to_csv(os.path.join(exp_dir, "train_preds1.csv"))
-    val_preds.to_csv(os.path.join(exp_dir, "val_preds1.csv"))
+    train_preds.to_csv(os.path.join(crossval_dir, "train_preds1.csv"))
+    val_preds.to_csv(os.path.join(crossval_dir, "val_preds1.csv"))
 
     #model_file = os.path.join(exp_dir, "model1.pth")
-    torch.save(model1.state_dict(), os.path.join(exp_dir, f"crossval_model_1.pth"))
+    torch.save(model1.state_dict(), os.path.join(crossval_dir, f"crossval_model_1.pth"))
 
     """
     model1_rotation_results = np.zeros(4)
@@ -476,6 +480,11 @@ def main(c, exp_name="all", sampling="inverse"):
     model2 = model2.to(device)
     for epoch in range(1, n_epochs + 1):
         if epoch > 1:
+            # Delete previous dataset and dataloader
+            del dataset2
+            del data_loader2
+            torch.cuda.empty_cache()
+
             data_ns_c2 = sample_non_schools(cluster_2_rows, data, sampling)
             data_ns_c2.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_2.csv"))
 
@@ -546,11 +555,11 @@ def main(c, exp_name="all", sampling="inverse"):
             logging=logging
         )
     
-    train_preds.to_csv(os.path.join(exp_dir, "train_preds2.csv"))
-    val_preds.to_csv(os.path.join(exp_dir, "val_preds2.csv"))
+    train_preds.to_csv(os.path.join(crossval_dir, "train_preds2.csv"))
+    val_preds.to_csv(os.path.join(crossval_dir, "val_preds2.csv"))
 
     #model_file = os.path.join(exp_dir, "model2.pth")
-    torch.save(model2.state_dict(), os.path.join(exp_dir, f"crossval_model_2.pth"))
+    torch.save(model2.state_dict(), os.path.join(crossval_dir, f"crossval_model_2.pth"))
 
     """
     model2_rotation_results = np.zeros(4)
