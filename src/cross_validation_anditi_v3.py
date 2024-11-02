@@ -257,7 +257,7 @@ def main(c, exp_name="all", sampling="inverse", OHEM=False):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", "dynamic", sampling)
+    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", "dynamic", f"{sampling}_OHEM" if OHEM else sampling)
     if not os.path.exists(crossval_dir):
         os.makedirs(crossval_dir)
 
