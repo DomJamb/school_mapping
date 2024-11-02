@@ -258,7 +258,7 @@ def plot_worst_ns(cwd, num_images=10):
         results = results[results["y_true"] == 0]
 
         # Sort by positive class probs and take first N rows
-        ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images)
+        ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
         plt.figure(figsize=(16,10))
         plt.suptitle(f'Worst non-schools, train ({"North" if i == 0 else "South"})')
@@ -282,7 +282,7 @@ def plot_worst_ns(cwd, num_images=10):
         results = results[results["y_true"] == 0]
 
         # Sort by positive class probs and take first N rows
-        ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images)
+        ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
         plt.figure(figsize=(16,10))
         plt.suptitle(f'Worst non-schools, val ({"North -> South" if i == 0 else "South -> North"})')
