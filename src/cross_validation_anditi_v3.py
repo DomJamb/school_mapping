@@ -180,6 +180,7 @@ def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse', OHEM=Fals
     if OHEM:
         # Calculate multiplicative probability
         dataset_ns["school_x_cluster"] = dataset_ns["y_probs_pos"] * dataset_ns["cluster_prob"]
+        dataset_ns["school_x_cluster"] = dataset_ns["school_x_cluster"] / dataset_ns["school_x_cluster"].sum()
 
         # Calculate sizes
         size1 = int(len(cluster_rows) / 2 + 0.5)
