@@ -25,7 +25,7 @@ if __name__ == "__main__":
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
 
-            plt.subplot(2, num_images / 2, i + 1)
+            plt.subplot(2, int(num_images / 2), i + 1)
             plt.imshow(image)
             plt.axis('off')
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_train_{i}.png"))
@@ -48,7 +48,7 @@ if __name__ == "__main__":
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
 
-            plt.subplot(2, num_images / 2, i + 1)
+            plt.subplot(2, int(num_images / 2), i + 1)
             plt.imshow(image)
             plt.axis('off')
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_val_{i}.png"))
