@@ -20,7 +20,7 @@ if __name__ == "__main__":
         # Sort by positive class probs and take first N rows
         ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
-        plt.figure(figsize=(16,10))
+        plt.figure()
         for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
@@ -28,6 +28,7 @@ if __name__ == "__main__":
             plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
+        plt.tight_layout()
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_train_{i}.png"))
 
     for i, file_name in enumerate(["val_preds1.csv", "val_preds2.csv"]):
@@ -43,7 +44,7 @@ if __name__ == "__main__":
         # Sort by positive class probs and take first N rows
         ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
-        plt.figure(figsize=(16,10))
+        plt.figure()
         for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
@@ -51,4 +52,5 @@ if __name__ == "__main__":
             plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
+        plt.tight_layout()
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_val_{i}.png"))

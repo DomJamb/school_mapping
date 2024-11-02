@@ -260,7 +260,7 @@ def plot_worst_ns(cwd, num_images=10):
         # Sort by positive class probs and take first N rows
         ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
-        plt.figure(figsize=(16,10))
+        plt.figure()
         plt.suptitle(f'Worst non-schools, train ({"North" if i == 0 else "South"})')
         for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
@@ -269,6 +269,7 @@ def plot_worst_ns(cwd, num_images=10):
             plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
+        plt.tight_layout()
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_train_{i}.png"))
 
     for i, file_name in enumerate(["val_preds1.csv", "val_preds2.csv"]):
@@ -284,7 +285,7 @@ def plot_worst_ns(cwd, num_images=10):
         # Sort by positive class probs and take first N rows
         ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
-        plt.figure(figsize=(16,10))
+        plt.figure()
         plt.suptitle(f'Worst non-schools, val ({"North -> South" if i == 0 else "South -> North"})')
         for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
@@ -293,6 +294,7 @@ def plot_worst_ns(cwd, num_images=10):
             plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
+        plt.tight_layout()
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_val_{i}.png"))
 
 def main(c, exp_name="all", sampling="inverse", OHEM=False):    
