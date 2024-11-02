@@ -150,7 +150,7 @@ def calculate_bivar_gaussian_pdf(point_df, mean, cov_matrix):
 
     return prob_density
 
-def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse'):
+def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse', OHEM=False):
     dataset_ns = data_ns.copy()
 
     # Calculate centroid
@@ -177,8 +177,27 @@ def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse'):
         dataset_ns["cluster_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid, cov_matrix))
         dataset_ns["cluster_prob"] = dataset_ns["cluster_prob"] / dataset_ns["cluster_prob"].sum()
 
-    # Choose nonschools for cluster based on probability
-    cluster_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_rows), replace=False, p=dataset_ns["cluster_prob"])
+    if OHEM:
+        # Calculate multiplicative probability
+        dataset_ns["school_x_cluster"] = dataset_ns["y_probs_pos"] * dataset_ns["cluster_prob"]
+
+        # Calculate sizes
+        size1 = int(len(cluster_rows) / 2 + 0.5)
+        size2 = int(len(cluster_rows) / 2)
+
+        # Choose nonschools based on multiplicative probability
+        cluster_ns_indices1 = np.random.choice(dataset_ns.index, size=size1, replace=False, p=dataset_ns["school_x_cluster"])
+        dataset_ns = dataset_ns.drop(cluster_ns_indices1)
+
+        # Choose nonschools based on cluster probability
+        dataset_ns["cluster_prob"] = dataset_ns["cluster_prob"] / dataset_ns["cluster_prob"].sum()
+        cluster_ns_indices2 = np.random.choice(dataset_ns.index, size=size2, replace=False, p=dataset_ns["cluster_prob"])
+
+        cluster_ns_indices = np.concatenate((cluster_ns_indices1, cluster_ns_indices2))
+    else:
+        # Choose nonschools for cluster based on probability
+        cluster_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_rows), replace=False, p=dataset_ns["cluster_prob"])
+
     cluster_ns = dataset_ns.loc[cluster_ns_indices]
 
     return cluster_ns
@@ -226,7 +245,7 @@ def plot_pr(preds_path, save_path):
     plt.legend()
     plt.savefig(os.path.join(save_path, "PR_val.png"))
 
-def main(c, exp_name="all", sampling="inverse"):    
+def main(c, exp_name="all", sampling="inverse", OHEM=False):    
     # f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     # data = pd.read_csv(f)
     # dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/anditi/large'
@@ -282,6 +301,28 @@ def main(c, exp_name="all", sampling="inverse"):
     data = data[data['class']=="non_school"]
     data = data[data['clean']==0]
     data = data.to_crs('EPSG:3857')
+
+    if OHEM:
+        df_all = pd.DataFrame(columns=["filepath","UID","class"])
+        for img in [*cluster_1, *cluster_2]:
+            image_file = f"{dest_dir}/{img}.jpeg"
+            uid = img
+            row = {"filepath": image_file, "UID": uid, "class": "school"}
+            df_all.loc[len(df_all)] = row
+        for i, row in data.iterrows():
+            image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+            uid = row['UID']
+            row = {"filepath": image_file, "UID": uid, "class": "non_school"}
+            df_all.loc[len(df_all)] = row
+
+        dataset_all = SchoolDataset(df_all, classes_dict, train_transform)
+        data_loader_all = torch.utils.data.DataLoader(
+                dataset_all,
+                batch_size=c["batch_size"],
+                num_workers=c["n_workers"],
+                shuffle=False,
+                drop_last=False
+            )
 
     data_ns_c1 = sample_non_schools(cluster_1_rows, data, sampling)
     data_ns_c1.to_csv(os.path.join(data_dir, "ep1_non_schools_cluster_1.csv"))
@@ -374,8 +415,36 @@ def main(c, exp_name="all", sampling="inverse"):
             del data_loader1
             torch.cuda.empty_cache()
 
+            # Get model predictions for all non-schools (if OHEM sampling)
+            if OHEM:
+                _, _, preds = cnn_utils.evaluate(
+                    data_loader_all, 
+                    classes, 
+                    model1, 
+                    criterion, 
+                    device, 
+                    pos_label=1,
+                    wandb=wandb, 
+                    logging=logging
+                )
+
+                # Filter so that only non-schools are in dataframe
+                preds = preds[preds["y_true"] == 0]
+
+                # Set positive class probs
+                preds["y_probs_pos"] = preds.apply(lambda row: row["y_probs"] if row["y_preds"] == 1 else 1 - row["y_probs"], axis=1)
+
+                # Merge dataframes
+                data_copy = data.merge(preds[["UID", "y_probs_pos"]], on="UID", how="left")
+
+                # Normalize probability
+                data_copy["y_probs_pos"] = data_copy["y_probs_pos"].fillna(0)
+                data_copy["y_probs_pos"] = data_copy["y_probs_pos"] / data_copy["y_probs_pos"].sum()
+            else:
+                data_copy = data.copy()
+
             # Sample non-schools
-            data_ns_c1 = sample_non_schools(cluster_1_rows, data, sampling)
+            data_ns_c1 = sample_non_schools(cluster_1_rows, data_copy, sampling, OHEM)
             data_ns_c1.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_1.csv"))
 
             # Find non-school files
@@ -538,7 +607,35 @@ def main(c, exp_name="all", sampling="inverse"):
             del data_loader2
             torch.cuda.empty_cache()
 
-            data_ns_c2 = sample_non_schools(cluster_2_rows, data, sampling)
+            # Get model predictions for all non-schools (if OHEM sampling)
+            if OHEM:
+                _, _, preds = cnn_utils.evaluate(
+                    data_loader_all, 
+                    classes, 
+                    model2, 
+                    criterion, 
+                    device, 
+                    pos_label=1,
+                    wandb=wandb, 
+                    logging=logging
+                )
+
+                # Filter so that only non-schools are in dataframe
+                preds = preds[preds["y_true"] == 0]
+
+                # Set positive class probs
+                preds["y_probs_pos"] = preds.apply(lambda row: row["y_probs"] if row["y_preds"] == 1 else 1 - row["y_probs"], axis=1)
+
+                # Merge dataframes
+                data_copy = data.merge(preds[["UID", "y_probs_pos"]], on="UID", how="left")
+
+                # Normalize probability
+                data_copy["y_probs_pos"] = data_copy["y_probs_pos"].fillna(0)
+                data_copy["y_probs_pos"] = data_copy["y_probs_pos"] / data_copy["y_probs_pos"].sum()
+            else:
+                data_copy = data.copy()
+
+            data_ns_c2 = sample_non_schools(cluster_2_rows, data_copy, sampling, OHEM)
             data_ns_c2.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_2.csv"))
 
             images_non_school_2 = []
@@ -760,6 +857,7 @@ if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
     parser.add_argument("--sampling", help="Chosen non-school sampling method", default="inverse")
+    parser.add_argument("--OHEM", help="Choose non-schools based on hard examples", action="store_true") 
     parser.add_argument("--cnn_config", help="Config file", default="convnext_small")
     parser.add_argument('-d', "--device", help="device", default="cuda:0")
     parser.add_argument('-e', "--exp_name", default="global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large")
@@ -771,4 +869,4 @@ if __name__ == "__main__":
     config_file = os.path.join(cwd, "configs", "cnn_configs", args.cnn_config + ".yaml")
     c = config_utils.load_config(config_file)
 
-    main(c, args.exp_name, args.sampling)
+    main(c, args.exp_name, args.sampling, args.OHEM)
