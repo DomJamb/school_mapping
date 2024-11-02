@@ -300,7 +300,7 @@ def main(c, exp_name="all", sampling="inverse"):
     for i in range(len(images_non_school_1)):
         img = images_non_school_1[i]
         uid = img.split("/")[-1].replace(".jpeg", "")
-        row = {"filepath":img, "UID": uid, "class":"school"}
+        row = {"filepath":img, "UID": uid, "class":"non_school"}
         df1.loc[len(df1)] = row
     df1.to_csv(os.path.join(crossval_dir, "df1.csv"), index=False)
 
@@ -330,7 +330,7 @@ def main(c, exp_name="all", sampling="inverse"):
     for i in range(len(images_non_school_2)):
         img = images_non_school_2[i]
         uid = img.split("/")[-1].replace(".jpeg", "")
-        row = {"filepath":img, "UID": uid, "class":"school"}
+        row = {"filepath":img, "UID": uid, "class":"non_school"}
         df2.loc[len(df2)] = row
     df2.to_csv(os.path.join(crossval_dir, "df2.csv"), index=False)
     
@@ -394,7 +394,7 @@ def main(c, exp_name="all", sampling="inverse"):
             for i in range(len(images_non_school_1)):
                 img = images_non_school_1[i]
                 uid = img.split("/")[-1].replace(".jpeg", "")
-                row = {"filepath":img, "UID": uid, "class":"school"}
+                row = {"filepath":img, "UID": uid, "class":"non_school"}
                 df1.loc[len(df1)] = row
             df1.to_csv(os.path.join(crossval_dir, "df1.csv"), index=False)
 
@@ -555,7 +555,7 @@ def main(c, exp_name="all", sampling="inverse"):
             for i in range(len(images_non_school_2)):
                 img = images_non_school_2[i]
                 uid = img.split("/")[-1].replace(".jpeg", "")
-                row = {"filepath":img, "UID": uid, "class":"school"}
+                row = {"filepath":img, "UID": uid, "class":"non_school"}
                 df2.loc[len(df2)] = row
             df2.to_csv(os.path.join(crossval_dir, "df2.csv"), index=False)
             
