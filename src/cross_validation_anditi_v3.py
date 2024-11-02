@@ -200,7 +200,7 @@ def plot_pr(preds_path, save_path):
         precision, recall, _ = precision_recall_curve(results["y_true"], results["y_probs_pos"], pos_label=1)
         auc_score = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'{"North -> South" if i == 0 else "South -> North"} (AUC = {auc_score:.2f})')
+        plt.plot(recall, precision, label=f'{"North" if i == 0 else "South"} (AUC = {auc_score:.2f})')
 
     plt.legend()
     plt.savefig(os.path.join(save_path, "PR_train.png"))
