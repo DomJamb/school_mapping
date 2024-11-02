@@ -246,6 +246,55 @@ def plot_pr(preds_path, save_path):
     plt.legend()
     plt.savefig(os.path.join(save_path, "PR_val.png"))
 
+def plot_worst_ns(cwd, num_images=10):
+    for i, file_name in enumerate(["train_preds1.csv", "train_preds2.csv"]):
+        f = os.path.join(cwd, file_name)
+        results = pd.read_csv(f)
+
+        # Set positive class probs
+        results["y_probs_pos"] = results.apply(lambda row: row["y_probs"] if row["y_preds"] == 1 else 1 - row["y_probs"], axis=1)
+
+        # Filter so that only non-schools are in dataframe
+        results = results[results["y_true"] == 0]
+
+        # Sort by positive class probs and take first N rows
+        ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images)
+
+        plt.figure(figsize=(16,10))
+        plt.suptitle(f'Worst non-schools, train ({"North" if i == 0 else "South"})')
+        for i, row in ns_worst_rows.iterrows():
+            path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+            image = Image.open(path).convert("RGB")
+
+            plt.subplot(2, num_images / 2, i + 1)
+            plt.imshow(image)
+            plt.axis('off')
+        plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_train_{i}.png"))
+
+    for i, file_name in enumerate(["val_preds1.csv", "val_preds2.csv"]):
+        f = os.path.join(cwd, file_name)
+        results = pd.read_csv(f)
+
+        # Set positive class probs
+        results["y_probs_pos"] = results.apply(lambda row: row["y_probs"] if row["y_preds"] == 1 else 1 - row["y_probs"], axis=1)
+
+        # Filter so that only non-schools are in dataframe
+        results = results[results["y_true"] == 0]
+
+        # Sort by positive class probs and take first N rows
+        ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images)
+
+        plt.figure(figsize=(16,10))
+        plt.suptitle(f'Worst non-schools, val ({"North -> South" if i == 0 else "South -> North"})')
+        for i, row in ns_worst_rows.iterrows():
+            path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+            image = Image.open(path).convert("RGB")
+
+            plt.subplot(2, num_images / 2, i + 1)
+            plt.imshow(image)
+            plt.axis('off')
+        plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_val_{i}.png"))
+
 def main(c, exp_name="all", sampling="inverse", OHEM=False):    
     # f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     # data = pd.read_csv(f)
@@ -843,6 +892,7 @@ def main(c, exp_name="all", sampling="inverse", OHEM=False):
     f.close()
 
     plot_pr(crossval_dir, crossval_dir)
+    plot_worst_ns(crossval_dir)
     
     # Terminate trackers
     time_elapsed = time.time() - since
