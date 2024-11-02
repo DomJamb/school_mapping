@@ -113,7 +113,7 @@ class SchoolDataset(Dataset):
         """
         
         item = self.dataset.iloc[index]
-        uid = ""
+        uid = item["UID"]
         filepath= item["filepath"]
         image = Image.open(filepath).convert("RGB")
 
@@ -335,29 +335,31 @@ def main(c, exp_name="all", sampling="inverse"):
         image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
         images_non_school_2.append(image_file)
 
-    df1 = pd.DataFrame(columns=["filepath","class"])
+    df1 = pd.DataFrame(columns=["filepath","UID","class"])
     for i in range(len(images_school_1)):
-        img=images_school_1[i]
-        row = {"filepath":img, "class":"school"}
+        img = images_school_1[i]
+        uid = img.split("/")[-1].replace(".jpeg", "")
+        row = {"filepath":img, "UID": uid, "class":"school"}
         df1.loc[len(df1)] = row
     for i in range(len(images_non_school_1)):
-        img=images_non_school_1[i]
-        row = {"filepath":img, "class":"non_school"}
+        img = images_non_school_1[i]
+        uid = img.split("/")[-1].replace(".jpeg", "")
+        row = {"filepath":img, "UID": uid, "class":"school"}
         df1.loc[len(df1)] = row
     df1.to_csv(os.path.join(crossval_dir, "df1.csv"), index=False)
 
-    df2 = pd.DataFrame(columns=["filepath","class"])
+    df2 = pd.DataFrame(columns=["filepath","UID","class"])
     for i in range(len(images_school_2)):
-        img=images_school_2[i]
-        row = {"filepath":img, "class":"school"}
+        img = images_school_2[i]
+        uid = img.split("/")[-1].replace(".jpeg", "")
+        row = {"filepath":img, "UID": uid, "class":"school"}
         df2.loc[len(df2)] = row
     for i in range(len(images_non_school_2)):
-        img=images_non_school_2[i]
-        row = {"filepath":img, "class":"non_school"}
+        img = images_non_school_2[i]
+        uid = img.split("/")[-1].replace(".jpeg", "")
+        row = {"filepath":img, "UID": uid, "class":"school"}
         df2.loc[len(df2)] = row
     df2.to_csv(os.path.join(crossval_dir, "df2.csv"), index=False)
-
-
 
     dataset1 = SchoolDataset(df1, classes_dict, train_transform)
     data_loader1 = torch.utils.data.DataLoader(
