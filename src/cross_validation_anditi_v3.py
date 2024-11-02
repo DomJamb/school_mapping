@@ -262,11 +262,11 @@ def plot_worst_ns(cwd, num_images=10):
 
         plt.figure(figsize=(16,10))
         plt.suptitle(f'Worst non-schools, train ({"North" if i == 0 else "South"})')
-        for i, row in ns_worst_rows.iterrows():
+        for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
 
-            plt.subplot(2, int(num_images / 2), i + 1)
+            plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_train_{i}.png"))
@@ -286,11 +286,11 @@ def plot_worst_ns(cwd, num_images=10):
 
         plt.figure(figsize=(16,10))
         plt.suptitle(f'Worst non-schools, val ({"North -> South" if i == 0 else "South -> North"})')
-        for i, row in ns_worst_rows.iterrows():
+        for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
 
-            plt.subplot(2, int(num_images / 2), i + 1)
+            plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_val_{i}.png"))

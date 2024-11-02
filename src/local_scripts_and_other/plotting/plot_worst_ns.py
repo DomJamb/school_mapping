@@ -21,11 +21,11 @@ if __name__ == "__main__":
         ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
         plt.figure(figsize=(16,10))
-        for i, row in ns_worst_rows.iterrows():
+        for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
 
-            plt.subplot(2, int(num_images / 2), i + 1)
+            plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_train_{i}.png"))
@@ -44,11 +44,11 @@ if __name__ == "__main__":
         ns_worst_rows = results.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
 
         plt.figure(figsize=(16,10))
-        for i, row in ns_worst_rows.iterrows():
+        for j, row in ns_worst_rows.iterrows():
             path = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
             image = Image.open(path).convert("RGB")
 
-            plt.subplot(2, int(num_images / 2), i + 1)
+            plt.subplot(2, int(num_images / 2), j + 1)
             plt.imshow(image)
             plt.axis('off')
         plt.savefig(os.path.join(cwd, f"{num_images}_worst_ns_val_{i}.png"))
