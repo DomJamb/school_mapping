@@ -188,11 +188,11 @@ def sample_non_schools(cluster_rows, data_ns, sampling_mode='inverse', OHEM=Fals
 
         # Choose nonschools based on multiplicative probability
         cluster_ns_indices1 = np.random.choice(dataset_ns.index, size=size1, replace=False, p=dataset_ns["school_x_cluster"])
-        dataset_ns = dataset_ns.drop(cluster_ns_indices1)
+        dataset_ns_copy = dataset_ns.drop(cluster_ns_indices1)
 
         # Choose nonschools based on cluster probability
-        dataset_ns["cluster_prob"] = dataset_ns["cluster_prob"] / dataset_ns["cluster_prob"].sum()
-        cluster_ns_indices2 = np.random.choice(dataset_ns.index, size=size2, replace=False, p=dataset_ns["cluster_prob"])
+        dataset_ns_copy["cluster_prob"] = dataset_ns_copy["cluster_prob"] / dataset_ns_copy["cluster_prob"].sum()
+        cluster_ns_indices2 = np.random.choice(dataset_ns_copy.index, size=size2, replace=False, p=dataset_ns_copy["cluster_prob"])
 
         cluster_ns_indices = np.concatenate((cluster_ns_indices1, cluster_ns_indices2))
     else:
