@@ -1,5 +1,6 @@
 import os
 import time
+import random
 import argparse
 from collections import Counter
 import torch
@@ -375,7 +376,7 @@ def main(c, exp_name="all", sampling="inverse"):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", sampling)
+    crossval_dir = os.path.join(cwd, c["exp_dir"], "cross_validation_anditi", sampling, random.randint(1000, 9999))
     if not os.path.exists(crossval_dir):
         os.makedirs(crossval_dir)
 
