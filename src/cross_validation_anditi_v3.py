@@ -264,7 +264,7 @@ def plot_worst(cwd, anditi_dir, num_images=10):
         results_ns = results[results["y_true"] == 0]
 
         # Sort by positive class probs and take first N rows
-        ns_worst_rows = results_ns.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True).to_crs('EPSG:4326')
+        ns_worst_rows = results_ns.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
         ns_worst_rows.to_csv(os.path.join(save_dir, f"{num_images}_worst_ns_train_{i + 1}.csv"))
 
         plt.figure()
@@ -284,7 +284,7 @@ def plot_worst(cwd, anditi_dir, num_images=10):
         results_s = results[results["y_true"] == 1]
 
         # Sort by positive class probs and take first N rows
-        s_worst_rows = results_s.sort_values(by="y_probs_pos", ascending=True).head(num_images).reset_index(drop=True).to_crs('EPSG:4326')
+        s_worst_rows = results_s.sort_values(by="y_probs_pos", ascending=True).head(num_images).reset_index(drop=True)
         s_worst_rows.to_csv(os.path.join(save_dir, f"{num_images}_worst_s_train_{i + 1}.csv"))
 
         plt.figure()
@@ -311,7 +311,7 @@ def plot_worst(cwd, anditi_dir, num_images=10):
         results_ns = results[results["y_true"] == 0]
 
         # Sort by positive class probs and take first N rows
-        ns_worst_rows = results_ns.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True).to_crs('EPSG:4326')
+        ns_worst_rows = results_ns.sort_values(by="y_probs_pos", ascending=False).head(num_images).reset_index(drop=True)
         ns_worst_rows.to_csv(os.path.join(save_dir, f"{num_images}_worst_ns_val_{i + 1}.csv"))
 
         plt.figure()
@@ -331,7 +331,7 @@ def plot_worst(cwd, anditi_dir, num_images=10):
         results_s = results[results["y_true"] == 1]
 
         # Sort by positive class probs and take first N rows
-        s_worst_rows = results_s.sort_values(by="y_probs_pos", ascending=True).head(num_images).reset_index(drop=True).to_crs('EPSG:4326')
+        s_worst_rows = results_s.sort_values(by="y_probs_pos", ascending=True).head(num_images).reset_index(drop=True)
         s_worst_rows.to_csv(os.path.join(save_dir, f"{num_images}_worst_s_val_{i + 1}.csv"))
 
         plt.figure()
