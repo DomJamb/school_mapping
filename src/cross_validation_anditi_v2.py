@@ -480,7 +480,7 @@ def main(c, exp_name="all", sampling="inverse"):
         )
    
     classes = ['school', 'non_school']
-    n_epochs = 13
+    n_epochs = 20
     since = time.time()
 
     # FIRST PASS
@@ -503,6 +503,8 @@ def main(c, exp_name="all", sampling="inverse"):
     model1.load_state_dict(torch.load(model_file, map_location=device))
     model1 = model1.to(device)
 
+    f1_model1 = pd.DataFrame(columns=["epoch", "train", "val"])
+
     for epoch in range(1, n_epochs + 1):
         logging.info("\nModel 1, Epoch {}/{}".format(epoch, n_epochs))
 
@@ -519,10 +521,25 @@ def main(c, exp_name="all", sampling="inverse"):
         )
         log_string_1 += "Model 1, Epoch {}/{}: train F1 = {}\n".format(epoch, n_epochs, train_results['f1_score'])
 
-        # Terminate if learning rate becomes too low
-        learning_rate = optimizer.param_groups[0]["lr"]
-        if learning_rate < 1e-10:
-            break
+        val_results, _, _ = cnn_utils.evaluate(
+            data_loader2, 
+            classes, 
+            model1, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+
+        f1_model1.loc[len(f1_model1)] = {"epoch": epoch, "train": train_results["f1_score"], "val": val_results["f1_score"]}
+        
+        # # Terminate if learning rate becomes too low
+        # learning_rate = optimizer.param_groups[0]["lr"]
+        # if learning_rate < 1e-10:
+        #     break
+
+    f1_model1.to_csv(os.path.join(crossval_dir, "f1_model1.csv"))
 
     train_results1, train_cm, train_preds = cnn_utils.evaluate(
             data_loader1, 
@@ -627,6 +644,9 @@ def main(c, exp_name="all", sampling="inverse"):
     )
     model2.load_state_dict(torch.load(model_file, map_location=device))
     model2 = model2.to(device)
+
+    f1_model2 = pd.DataFrame(columns=["epoch", "train", "val"])
+
     for epoch in range(1, n_epochs + 1):
         logging.info("\nModel 2, Epoch {}/{}".format(epoch, n_epochs))
 
@@ -643,10 +663,25 @@ def main(c, exp_name="all", sampling="inverse"):
         )
         log_string_2 += "Model 2, Epoch {}/{}: train F1 = {}\n".format(epoch, n_epochs, train_results['f1_score'])
 
-        # Terminate if learning rate becomes too low
-        learning_rate = optimizer.param_groups[0]["lr"]
-        if learning_rate < 1e-10:
-            break
+        val_results, _, _ = cnn_utils.evaluate(
+            data_loader1, 
+            classes, 
+            model2, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+
+        f1_model2.loc[len(f1_model2)] = {"epoch": epoch, "train": train_results["f1_score"], "val": val_results["f1_score"]}
+
+        # # Terminate if learning rate becomes too low
+        # learning_rate = optimizer.param_groups[0]["lr"]
+        # if learning_rate < 1e-10:
+        #     break
+
+    f1_model2.to_csv(os.path.join(crossval_dir, "f1_model2.csv"))
 
     train_results2, train_cm, train_preds = cnn_utils.evaluate(
             data_loader2, 
