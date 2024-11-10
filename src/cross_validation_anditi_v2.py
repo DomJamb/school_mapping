@@ -32,9 +32,9 @@ import matplotlib.pyplot as plt
 cwd = os.path.dirname(os.getcwd())
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 logging.info(f"Device: {device}")
-SEED = 40
-random.seed(SEED)
-numpy.random.seed(SEED)
+# SEED = 40
+# random.seed(SEED)
+# numpy.random.seed(SEED)
 
 classes_dict = {"school" : 1, "non_school": 0}
 imagenet_mean, imagenet_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
