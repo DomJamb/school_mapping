@@ -2,7 +2,7 @@ import os
 from collections import defaultdict
 
 base_dir = '../../../exp/cross_validation_anditi/'
-sampling_method = 'gaussian'
+sampling_method = 'dynamic/gaussian'
 runs_dir = os.path.join(base_dir, sampling_method)
 
 results = defaultdict(list)
@@ -24,7 +24,10 @@ for curr_run_name in os.listdir(runs_dir):
                         split_line = line.split(':')
                         results[split_line[0]].append(float(split_line[1].strip()))
 
-with open(f'./{sampling_method}_results_avg.txt', 'w') as avg_file:
-    for line, vals in results.items():
+with open(f'./{sampling_method.replace("/", "_")}_results_avg.txt', 'w') as avg_file:
+    for i, (line, vals) in enumerate(results.items()):
         avg_val = sum(vals) / len(vals)
         avg_file.write(f"{line}: {avg_val}\n")
+
+        if i > 0 and (i + 1) % 3 == 0:
+            avg_file.write("\n")
