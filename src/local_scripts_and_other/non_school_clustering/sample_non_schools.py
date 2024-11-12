@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.stats import multivariate_normal
 
 def calculate_euclidean_distance(point_df, point):
     # Transform geometry string to latitude, longitude tuple
@@ -12,6 +13,16 @@ def calculate_euclidean_distance(point_df, point):
     dist =  ((point_df[0] - point[0]) ** 2 + (point_df[1] - point[1]) ** 2) ** 0.5
 
     return dist
+
+def calculate_bivar_gaussian_pdf(point_df, mean, cov_matrix):
+    # Transform geometry string to latitude, longitude tuple
+    point_df = point_df.strip().replace("POINT (", "").replace(")", "")
+    point_df = tuple(map(float, point_df.split()))
+    
+    # Calculate bivariate gaussian probability density
+    prob_density = multivariate_normal.pdf(point_df, mean, cov_matrix)
+
+    return prob_density
 
 if __name__ == "__main__":
     cwd = os.path.dirname(os.path.realpath(__file__))
@@ -37,6 +48,21 @@ if __name__ == "__main__":
     centroid1 = (cluster_1_rows["lon"].mean(), cluster_1_rows["lat"].mean())
     centroid2 = (cluster_2_rows["lon"].mean(), cluster_2_rows["lat"].mean())
 
+    # Calculate variance
+    var1 = (cluster_1_rows["lon"].var(), cluster_1_rows["lat"].var())
+    var2 = (cluster_2_rows["lon"].var(), cluster_2_rows["lat"].var())
+
+    # Calculate covariance matrices
+    cov_matrix1 = np.array([
+        [2 * var1[0], 0],
+        [0, 2 * var1[1]]
+    ])
+
+    cov_matrix2 = np.array([
+        [2 * var2[0], 0],
+        [0, 2 * var2[1]]
+    ])
+
     print(f"Centroid 1 (lon, lat): {centroid1}")
     print(f"Centroid 2 (lon, lat): {centroid2}")
 
@@ -48,8 +74,8 @@ if __name__ == "__main__":
     # Calculate distance from centroid 1
     dataset_ns["c1_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid1))
 
-    # Calculate probability to belong to centroid 1 (1 / d1)
-    dataset_ns["c1_prob"] = 1 / (dataset_ns["c1_dist"] + 1e-10)
+    # Calculate probability to belong to centroid 1 (bivariate Gaussian)
+    dataset_ns["c1_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid1, cov_matrix1))
     dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
 
     # Plot sampling probability
@@ -58,7 +84,7 @@ if __name__ == "__main__":
     plt.xlabel("Distance")
     plt.ylabel("Probability")
     plt.scatter(dataset_ns["c1_dist"], dataset_ns["c1_prob"])
-    plt.savefig(f"probability_plot_c1.png")
+    plt.savefig(f"gaussian_probability_plot_c1.png")
 
     # Choose nonschools for cluster 1 based on probability 1
     cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
@@ -71,8 +97,8 @@ if __name__ == "__main__":
     # Calculate distance from centroid 2
     dataset_ns["c2_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid2))
 
-    # Calculate probability to belong to centroid 2 (1 / d2)
-    dataset_ns["c2_prob"] = 1 / (dataset_ns["c2_dist"] + 1e-10)
+    # Calculate probability to belong to centroid 2 (bivariate Gaussian)
+    dataset_ns["c2_prob"] = dataset_ns["geometry"].apply(lambda row: calculate_bivar_gaussian_pdf(row, centroid2, cov_matrix2))
     dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
 
     # Plot sampling probability
@@ -81,7 +107,7 @@ if __name__ == "__main__":
     plt.xlabel("Distance")
     plt.ylabel("Probability")
     plt.scatter(dataset_ns["c2_dist"], dataset_ns["c2_prob"])
-    plt.savefig(f"probability_plot_c2.png")
+    plt.savefig(f"gaussian_probability_plot_c2.png")
 
     # Choose nonschools for cluster 2 based on probability 2
     cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
@@ -89,7 +115,3 @@ if __name__ == "__main__":
 
     # Drop columns related to centroid 1
     cluster2_ns.drop(columns=["c1_dist", "c1_prob"], inplace=True)
-
-    # Save selected non schools for each cluster
-    cluster1_ns.to_csv(os.path.join(cwd, "non_schools_cluster_1.csv"), index=False)
-    cluster2_ns.to_csv(os.path.join(cwd, "non_schools_cluster_2.csv"), index=False)
