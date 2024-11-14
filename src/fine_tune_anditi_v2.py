@@ -260,6 +260,20 @@ def plot_worst(cwd, anditi_dir, num_images=10):
     plt.tight_layout()
     plt.savefig(os.path.join(save_dir, f"{num_images}_worst_s_train.png"))
 
+def plot_f1(cwd):
+    f1_model_path = os.path.join(cwd, 'f1_model.csv')
+    f1_model = pd.read_csv(f1_model_path)
+
+    plt.figure(figsize=(8,6))
+    plt.title('Train F1 over epochs')
+
+    plt.xlabel('Epoch')
+    plt.ylabel('F1 (%)')
+    plt.xticks(f1_model['epoch'])
+
+    plt.plot(f1_model['epoch'], f1_model['train'])
+    plt.savefig(os.path.join(cwd, 'F1_train.png'))
+
 def main(c, exp_name="all", sampling="inverse"):
     cwd = os.path.dirname(os.getcwd())
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
@@ -366,6 +380,19 @@ def main(c, exp_name="all", sampling="inverse"):
 
     f1_model = pd.DataFrame(columns=["epoch", "train"])
 
+    train_results, _, _ = cnn_utils.evaluate(
+        data_loader, 
+        classes, 
+        model, 
+        criterion, 
+        device, 
+        pos_label=1,
+        wandb=wandb, 
+        logging=logging
+    )
+
+    f1_model.loc[len(f1_model)] = {"epoch": 0, "train": train_results["f1_score"]}
+
     for epoch in range(1, n_epochs + 1):
         logging.info("\nEpoch {}/{}".format(epoch, n_epochs))
 
@@ -425,6 +452,7 @@ def main(c, exp_name="all", sampling="inverse"):
 
     plot_pr(finetune_dir, finetune_dir)
     plot_worst(finetune_dir, dest_dir)
+    plot_f1(finetune_dir)
     
     # Terminate trackers
     time_elapsed = time.time() - since
