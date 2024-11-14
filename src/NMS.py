@@ -7,7 +7,7 @@ f = open("/mnt/sdb/agorup/school_mapping/inference_data/adjacency_data_overlappi
 adjacency_data = pickle.load(f)
 
 df = pd.read_csv("/home/agorup/school_mapping/exp/global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large/inference_vietnam_overlap_filtered_ensembling_rotation_mean.csv")
-#df = df[df["pred"]>0.5]
+df = df[df["pred"]>0.5]
 df2 = df.copy()
 
 counter = 0
