@@ -364,6 +364,39 @@ def plot_worst(cwd, anditi_dir, num_images=10):
         plt.tight_layout()
         plt.savefig(os.path.join(save_dir, f"{num_images}_worst_s_val_{i + 1}.png"))
 
+def plot_f1(cwd):
+    f1_model1_path = os.path.join(cwd, 'f1_model1.csv')
+    f1_model2_path = os.path.join(cwd, 'f1_model2.csv')
+    
+    f1_model1 = pd.read_csv(f1_model1_path)
+    f1_model2 = pd.read_csv(f1_model2_path)
+
+    # Train F1 curve
+    plt.figure(figsize=(8,6))
+    plt.title('Train F1 over epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('F1 (%)')
+
+    for i, f1_csv in enumerate([f1_model1, f1_model2]):
+        plt.xticks(f1_csv['epoch'])
+        plt.plot(f1_csv['epoch'], f1_csv['train'], label=f'{"North" if i == 0 else "South"}')
+
+    plt.legend()
+    plt.savefig(os.path.join(cwd, 'F1_train.png'))
+
+    # Val F1 curve
+    plt.figure(figsize=(8,6))
+    plt.title('Val F1 over epochs')
+    plt.xlabel('Epoch')
+    plt.ylabel('F1 (%)')
+
+    for i, f1_csv in enumerate([f1_model1, f1_model2]):
+        plt.xticks(f1_csv['epoch'])
+        plt.plot(f1_csv['epoch'], f1_csv['val'], label=f'{"North -> South" if i == 0 else "South -> North"}')
+
+    plt.legend()
+    plt.savefig(os.path.join(cwd, 'F1_val.png'))
+
 def main(c, exp_name="all", sampling="inverse"):    
     # f = "/mnt/sdb/agorup/school_mapping/inference_data/Anditi_filtered_schools_2-3857.csv"
     # data = pd.read_csv(f)
@@ -504,6 +537,30 @@ def main(c, exp_name="all", sampling="inverse"):
     model1 = model1.to(device)
 
     f1_model1 = pd.DataFrame(columns=["epoch", "train", "val"])
+
+    train_results, _, _ = cnn_utils.evaluate(
+            data_loader1, 
+            classes, 
+            model1, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+
+    val_results, _, _ = cnn_utils.evaluate(
+            data_loader2, 
+            classes, 
+            model1, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+    
+    f1_model1.loc[len(f1_model1)] = {"epoch": 0, "train": train_results["f1_score"], "val": val_results["f1_score"]}
 
     for epoch in range(1, n_epochs + 1):
         logging.info("\nModel 1, Epoch {}/{}".format(epoch, n_epochs))
@@ -646,6 +703,30 @@ def main(c, exp_name="all", sampling="inverse"):
     model2 = model2.to(device)
 
     f1_model2 = pd.DataFrame(columns=["epoch", "train", "val"])
+
+    train_results, _, _ = cnn_utils.evaluate(
+            data_loader2, 
+            classes, 
+            model2, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+
+    val_results, _, _ = cnn_utils.evaluate(
+            data_loader1, 
+            classes, 
+            model2, 
+            criterion, 
+            device, 
+            pos_label=1,
+            wandb=wandb, 
+            logging=logging
+        )
+    
+    f1_model2.loc[len(f1_model2)] = {"epoch": 0, "train": train_results["f1_score"], "val": val_results["f1_score"]}
 
     for epoch in range(1, n_epochs + 1):
         logging.info("\nModel 2, Epoch {}/{}".format(epoch, n_epochs))
@@ -841,6 +922,7 @@ def main(c, exp_name="all", sampling="inverse"):
 
     plot_pr(crossval_dir, crossval_dir)
     plot_worst(crossval_dir, dest_dir)
+    plot_f1(crossval_dir)
     
     # Terminate trackers
     time_elapsed = time.time() - since
