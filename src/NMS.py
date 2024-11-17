@@ -6,7 +6,7 @@ from tqdm import tqdm
 f = open("/mnt/sdb/agorup/school_mapping/inference_data/adjacency_data_overlapping.pkl","rb")
 adjacency_data = pickle.load(f)
 
-df = pd.read_csv("/home/agorup/school_mapping/exp/global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large/inference_vietnam_overlap_filtered_ensembling_rotation_mean.csv")
+df = pd.read_csv("/home/agorup/school_mapping/exp/fine_tune_anditi/gaussian/inference_vietnam_filtered_ensembling_rotation_mean.csv")
 df = df[df["pred"]>0.5]
 df2 = df.copy()
 
@@ -29,7 +29,7 @@ for i, row in tqdm(df2.iterrows(), total=len(df2)):
                 indices.append(ind.values[0])
         df = df.drop(indices)
 
-df.to_csv("/home/agorup/school_mapping/exp/global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large/inference_vietnam_overlap_filtered_ensembling_rotation_mean_NMS.csv")
+df.to_csv("/home/agorup/school_mapping/exp/fine_tune_anditi/gaussian/inference_vietnam_filtered_ensembling_rotation_mean_NMS.csv")
 
 print(counter)
 
