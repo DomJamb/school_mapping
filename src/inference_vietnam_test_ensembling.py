@@ -9,34 +9,23 @@ import numpy as np
 
 import pandas as pd
 import torch
-import geopandas as gpd
-from owslib.wms import WebMapService
 import sys
 from pyproj import Transformer
 
 sys.path.insert(0, "../utils/")
-import data_utils
 import config_utils
 import cnn_utils
 
-import threading
-from queue import Queue
 import time
 
-from download_satellite_images import producer, consumer
-
-import pickle
 from PIL import Image
-from torchvision import models, transforms
+from torchvision import transforms
 import torch.nn.functional as nnf
 from torch.utils.data import Dataset
 
 imagenet_mean, imagenet_std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 t_orig = transforms.Compose(
     [
-        
-        #transforms.Resize(size),
-        #transforms.CenterCrop(size),
         transforms.CenterCrop(500),
         transforms.ToTensor(),
         transforms.Normalize(imagenet_mean, imagenet_std),
@@ -47,9 +36,6 @@ test_transforms = []
 for i in range(8):
      t = transforms.Compose(
              [
-                
-                 #transforms.Resize(size),
-                 #transforms.CenterCrop(size),
                  transforms.RandomRotation((i*45,i*45)),
                  transforms.CenterCrop(500),
                  transforms.ToTensor(),
@@ -61,21 +47,16 @@ for i in range(8):
 
 t = transforms.Compose(
         [
-            
-            #transforms.Resize(size),
-            #transforms.CenterCrop(size),
             transforms.FiveCrop(size=500),
         ]
     )
-#test_transforms.append(t)
+
 t_tensor = transforms.Compose(
     [
         transforms.ToTensor(),
         transforms.Normalize(imagenet_mean, imagenet_std),
     ]
 )
-
-
 
 device = "cuda:0"
 SEED = 42
@@ -107,7 +88,7 @@ class SchoolDataset(Dataset):
     def __len__(self):
         return len(self.dataset)
 
-def inference(c, exp, finetune, device="cuda:0"):
+def inference(c, exp, device="cuda:0"):
     """
     Downloads satellite images based on geographic data points.
 
@@ -127,19 +108,9 @@ def inference(c, exp, finetune, device="cuda:0"):
     """
     
     dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference/large'
-
-    # f = open("/mnt/sdb/agorup/school_mapping/inference_data/district_name_to_bboxes_3857-500px.pkl", 'rb')
-    # data = pickle.load(f)
-    # images = []
-    # for district in data:
-    #     for index in range(len(data[district])):
-    #         image_file = f"{dest_dir}/{district}/{index}.jpeg"
-    #         images.append(image_file)
-
     
     f = "/mnt/sdb/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
     df = pd.read_csv(f)
-    data = df
     images = []
     for i, row in df.iterrows():
         district = row["district"]
@@ -158,10 +129,8 @@ def inference(c, exp, finetune, device="cuda:0"):
     cwd = os.path.dirname(os.getcwd())
     exp_name = f"{exp}"
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
-    if finetune != "":
-        exp_dir = os.path.join(exp_dir, f"fine_tune_{finetune}")
     print(exp_dir)
-    model_file = os.path.join(exp_dir, f"model.pth")
+    model_file = os.path.join(exp_dir, f"fine_tune_model.pth")
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
     out_file = os.path.join(exp_dir, "inference_vietnam_filtered_ensembling_rotation_mean.csv")
@@ -172,7 +141,6 @@ def inference(c, exp, finetune, device="cuda:0"):
 
     if os.path.exists(out_file):
         print("warning: file already exists")
-    
 
     classes = ['school', 'non_school']
     model, criterion, optimizer, scheduler = cnn_utils.load_model(
@@ -190,8 +158,6 @@ def inference(c, exp, finetune, device="cuda:0"):
         dropout=c["dropout"],
         device=device,
     )
-
-    
 
     model.load_state_dict(torch.load(model_file, map_location=device))
     model = model.to(device)
@@ -217,7 +183,6 @@ def inference(c, exp, finetune, device="cuda:0"):
             inputs = inputs.to(device)
 
             with torch.set_grad_enabled(False):
-                #with torch.autocast(device_type="cuda", dtype=torch.float16):
                 outputs = model(inputs)
                 soft_outputs = nnf.softmax(outputs, dim=1)
                 positive_probs = soft_outputs[:, 1]
@@ -229,11 +194,6 @@ def inference(c, exp, finetune, device="cuda:0"):
     preds = np.stack(preds, axis=0)
     mean_preds = np.mean(preds, axis=0)
 
-    #df = pd.DataFrame(columns=["image", "pred", "lon", "lat"])
-    # for i in range(len(images)):
-    #     image = images[i]
-    #     df.loc[len(df)-1] = {"image":image["image"], "pred":mean_preds[i], "lon":image["lon"], "lat":image["lat"]}
-
     value_dict = {
         "image": [image["image"] for image in images],
         "pred": [pred for pred in mean_preds],
@@ -241,9 +201,6 @@ def inference(c, exp, finetune, device="cuda:0"):
         "lat": [image["lat"] for image in images]
     }
     df = pd.DataFrame(value_dict)
-
-    
-
 
     # df = pd.DataFrame(columns=["image", "pred", "lon", "lat"])
     # for i in tqdm(range(len(images))):
@@ -287,20 +244,14 @@ def inference(c, exp, finetune, device="cuda:0"):
     #     row = {"image": f"{district}-{index}","pred": positive_prob, "lon":geom1, "lat":geom2}
     #     df.loc[i] = row
 
-
-
     df = df.sort_values("pred", ascending=False)
     df.to_csv(out_file, index=False)
-
-
-
 
 def main():
     # Parser
     parser = argparse.ArgumentParser(description="Satellite Image Download")
     parser.add_argument('-c', "--cnn_config", help="Config file", default="convnext_small")
-    parser.add_argument("-e", "--exp", default="global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large")
-    parser.add_argument("-f", "--fine_tune", default="anditi1")
+    parser.add_argument("-e", "--exp", default="fine_tune_anditi/gaussian")
     parser.add_argument('-d', "--device", help="device", default="cuda:0")
     args = parser.parse_args()
 
@@ -311,13 +262,9 @@ def main():
     device = args.device
 
     try:
-        inference(config, args.exp, args.fine_tune, args.device)
+        inference(config, args.exp, args.device)
     except Exception as e:
         print(f"error: {e}")
-
-    
-
-
 
 if __name__ == "__main__":
     main()
