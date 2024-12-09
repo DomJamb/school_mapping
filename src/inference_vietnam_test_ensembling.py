@@ -107,9 +107,9 @@ def inference(c, exp, device="cuda:0"):
     - None
     """
     
-    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference_overlap/large'
     
-    f = "/mnt/sdb/agorup/school_mapping/inference_data/inference_filtered_ghsl.csv"
+    f = "/mnt/sdb/agorup/school_mapping/inference_data/inference_overlap_filtered_ghsl.csv"
     df = pd.read_csv(f)
     images = []
     for i, row in df.iterrows():
