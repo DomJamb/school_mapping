@@ -61,7 +61,7 @@ t_tensor = transforms.Compose(
 device = "cuda:0"
 SEED = 42
 logging.basicConfig(level=logging.INFO)
-pyproj_transformer = Transformer.from_crs("EPSG:3857", "EPSG:4326")
+pyproj_transformer = Transformer.from_crs("EPSG:3857", "EPSG:4326", always_xy=True)
 
 class SchoolDataset(Dataset):
     def __init__(self, dataset, transform=None):
