@@ -56,17 +56,19 @@ def compare(anditi_path, preds_path, anditi_save_path, preds_save_path, stats_pa
         containing_rows = df_preds[df_preds['distance'] < 250]
 
         if len(containing_rows) > 0:
+            # Update probs
+            df_anditi.at[i, 'min_probs'] = containing_rows['pred'].min()
+            df_anditi.at[i, 'mean_probs'] = containing_rows['pred'].mean()
+            df_anditi.at[i, 'max_probs'] = containing_rows['pred'].max()
+
+        if len(containing_rows) > 0 and containing_rows['pred'].max() > 0.5:
             # Update found Anditi schools counter
             cnt += 1
         
             # Update found_Anditi column
             for index in containing_rows.index:
-                df_preds.at[index, 'found_Anditi'].append(img)
-
-            # Update probs
-            df_anditi.at[i, 'min_probs'] = containing_rows['pred'].min()
-            df_anditi.at[i, 'mean_probs'] = containing_rows['pred'].mean()
-            df_anditi.at[i, 'max_probs'] = containing_rows['pred'].max()
+                if df_preds.at[index, 'pred'] > 0.5:
+                    df_preds.at[index, 'found_Anditi'].append(img)
         else:
             # Find closest prediction
             closest_pred = df_preds.loc[df_preds['distance'].idxmin()]
