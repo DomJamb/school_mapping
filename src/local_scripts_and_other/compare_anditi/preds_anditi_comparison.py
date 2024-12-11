@@ -1,6 +1,7 @@
 import re
 import argparse
 
+import numpy as np
 import pandas as pd
 from pyproj import Transformer
 
@@ -16,6 +17,12 @@ def compare(anditi_path, preds_path, anditi_save_path, preds_save_path, stats_pa
 
     df_anditi = pd.read_csv(anditi_path)
     df_preds = pd.read_csv(preds_path)
+
+    # Remove nondistrict schools
+    with open('./nondistrict_schools.txt', 'r') as f:
+        nondistrict_schools = [line.strip() for line in f.readlines()]
+
+    df_anditi = df_anditi[~df_anditi['image'].isin(nondistrict_schools)]
 
     # Parse string coordinates
     df_preds[['longitude', 'latitude']] = df_preds.apply(lambda row: parse_coordinates(row['lon'], row['lat']), axis=1, result_type='expand')
@@ -40,7 +47,8 @@ def compare(anditi_path, preds_path, anditi_save_path, preds_save_path, stats_pa
         lon, lat = row['lon'], row['lat']
         
         # Find rows which contain the Anditi location
-        containing_rows = df_preds[(df_preds['longitude'] >= lon - 150) & (df_preds['longitude'] <= lon + 150) & (df_preds['latitude'] >= lat - 150) & (df_preds['latitude'] <= lat + 150)]
+        containing_rows = df_preds[np.sqrt((df_preds['longitude'] - lon) ** 2 + (df_preds['latitude'] - lat) ** 2) < 250]
+        # containing_rows = df_preds[(df_preds['longitude'] >= lon - 150) & (df_preds['longitude'] <= lon + 150) & (df_preds['latitude'] >= lat - 150) & (df_preds['latitude'] <= lat + 150)]
 
         # Update found Anditi schools counter
         if len(containing_rows) > 0:
@@ -76,11 +84,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Anditi dataset and dense inference predictions comparison')
 
     parser.add_argument('--anditi_path', help='Path to Anditi dataset csv file', default='./anditi_school.csv')
+    
     parser.add_argument('--inference_path', help='Path to dense inference predictions csv file', default='./inference_vietnam_filtered_ensembling_rotation_mean.csv')
-
     parser.add_argument('--anditi_save_path', help='Path to Anditi dataset save csv file', default='./anditi_school_comparison.csv')
     parser.add_argument('--inference_save_path', help='Path to dense inference predictions save csv file', default='./inference_vietnam_filtered_ensembling_rotation_mean_comparison.csv')
     parser.add_argument('--stats_path', help='Path to result statistics file', default='./stats_comparison.txt')
+
+    # parser.add_argument('--inference_path', help='Path to dense inference predictions csv file', default='./inference_vietnam_filtered_ensembling_rotation_mean_NMS.csv')
+    # parser.add_argument('--anditi_save_path', help='Path to Anditi dataset save csv file', default='./anditi_school_comparison_NMS.csv')
+    # parser.add_argument('--inference_save_path', help='Path to dense inference predictions save csv file', default='./inference_vietnam_filtered_ensembling_rotation_mean_comparison_NMS.csv')
+    # parser.add_argument('--stats_path', help='Path to result statistics file', default='./stats_comparison_NMS.txt')
 
     args = parser.parse_args()
 

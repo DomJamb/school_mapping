@@ -1,4 +1,4 @@
-Found 946/1003 (94.32%) Anditi schools
-Recall (min probs): 24.63%
-Recall (mean probs): 63.01%
-Recall (max probs): 89.93%
+Found 946/946 (100.00%) Anditi schools
+Recall (min probs): 1.80%
+Recall (mean probs): 47.25%
+Recall (max probs): 97.25%
