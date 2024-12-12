@@ -118,7 +118,7 @@ def calculate_bivar_gaussian_pdf(point_df, mean, cov_matrix):
 
     return prob_density
 
-def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode='inverse'):
+def sample_non_schools(cluster_1_rows, cluster_2_rows, num_samples_1, num_samples_2, dataset_ns, sampling_mode='inverse'):
     # Calculate centroids
     centroid1 = (cluster_1_rows["lon"].mean(), cluster_1_rows["lat"].mean())
     centroid2 = (cluster_2_rows["lon"].mean(), cluster_2_rows["lat"].mean())
@@ -136,7 +136,7 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
         dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
 
         # Choose nonschools for cluster 1 based on probability 1
-        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
+        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=num_samples_1, replace=False, p=dataset_ns["c1_prob"])
         cluster1_ns = dataset_ns.loc[cluster1_ns_indices]
 
         # Remove sampled nonschools
@@ -148,7 +148,7 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
         dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
 
         # Choose nonschools for cluster 2 based on probability 2
-        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
+        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=num_samples_2, replace=False, p=dataset_ns["c2_prob"])
         cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
     elif sampling_mode == 'gaussian':
         # Calculate variance
@@ -172,7 +172,7 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
         dataset_ns["c1_prob"] = dataset_ns["c1_prob"] / dataset_ns["c1_prob"].sum()
 
         # Choose nonschools for cluster 1 based on probability 1
-        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_1_rows), replace=False, p=dataset_ns["c1_prob"])
+        cluster1_ns_indices = np.random.choice(dataset_ns.index, size=num_samples_1, replace=False, p=dataset_ns["c1_prob"])
         cluster1_ns = dataset_ns.loc[cluster1_ns_indices]
 
         # Remove sampled nonschools
@@ -184,7 +184,7 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, dataset_ns, sampling_mode
         dataset_ns["c2_prob"] = dataset_ns["c2_prob"] / dataset_ns["c2_prob"].sum()
 
         # Choose nonschools for cluster 2 based on probability 2
-        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=len(cluster_2_rows), replace=False, p=dataset_ns["c2_prob"])
+        cluster2_ns_indices = np.random.choice(dataset_ns.index, size=num_samples_2, replace=False, p=dataset_ns["c2_prob"])
         cluster2_ns = dataset_ns.loc[cluster2_ns_indices]
 
     return cluster1_ns, cluster2_ns
@@ -322,7 +322,7 @@ def main(c, exp_name="all", sampling="inverse"):
     data = data[data['clean']==0]
     data = data.to_crs('EPSG:3857')
 
-    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, data.copy(), sampling)
+    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, len(cluster_1_rows), len(cluster_2_rows), data.copy(), sampling)
     data_ns_c1.to_csv(os.path.join(data_dir, "non_schools_cluster_1.csv"))
     data_ns_c2.to_csv(os.path.join(data_dir, "non_schools_cluster_2.csv"))
     data_ns = pd.concat([data_ns_c1, data_ns_c2])
