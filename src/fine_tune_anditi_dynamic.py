@@ -123,8 +123,6 @@ def sample_non_schools(cluster_1_rows, cluster_2_rows, num_samples_1, num_sample
     centroid1 = (cluster_1_rows["lon"].mean(), cluster_1_rows["lat"].mean())
     centroid2 = (cluster_2_rows["lon"].mean(), cluster_2_rows["lat"].mean())
 
-    print(f'Sampling non-schools using {sampling_mode} method')
-
     if sampling_mode == 'inverse':
         # Calculate distance from centroids
         dataset_ns["c1_dist"] = dataset_ns["geometry"].apply(lambda row: calculate_euclidean_distance(row, centroid1))
@@ -282,7 +280,7 @@ def main(c, exp_name="all", sampling="inverse"):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    finetune_dir = os.path.join(cwd, c["exp_dir"], "fine_tune_anditi", sampling)
+    finetune_dir = os.path.join(cwd, c["exp_dir"], "fine_tune_anditi_dynamic", sampling)
     if not os.path.exists(finetune_dir):
         os.makedirs(finetune_dir)
 
@@ -321,39 +319,6 @@ def main(c, exp_name="all", sampling="inverse"):
     data = data[data['class']=="non_school"]
     data = data[data['clean']==0]
     data = data.to_crs('EPSG:3857')
-
-    data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, len(cluster_1_rows), len(cluster_2_rows), data.copy(), sampling)
-    data_ns_c1.to_csv(os.path.join(data_dir, "non_schools_cluster_1.csv"))
-    data_ns_c2.to_csv(os.path.join(data_dir, "non_schools_cluster_2.csv"))
-    data_ns = pd.concat([data_ns_c1, data_ns_c2])
-
-    images_non_school = []
-    for i, row in data_ns.iterrows():
-        image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
-        images_non_school.append(image_file)
-
-    df = pd.DataFrame(columns=["filepath","UID","class"])
-    for i in range(len(images_school)):
-        img = images_school[i]
-        uid = img.split("/")[-1].replace(".jpeg", "")
-        row = {"filepath":img, "UID": uid, "class":"school"}
-        df.loc[len(df)] = row
-
-    for i in range(len(images_non_school)):
-        img = images_non_school[i]
-        uid = img.split("/")[-1].replace(".jpeg", "")
-        row = {"filepath":img, "UID": uid, "class":"non_school"}
-        df.loc[len(df)] = row
-    df.to_csv(os.path.join(finetune_dir, "df.csv"), index=False)
-
-    dataset = SchoolDataset(df, classes_dict, train_transform)
-    data_loader = torch.utils.data.DataLoader(
-            dataset,
-            batch_size=c["batch_size"],
-            num_workers=c["n_workers"],
-            shuffle=True,
-            drop_last=False
-        )
    
     classes = ['school', 'non_school']
     n_epochs = 20
@@ -380,21 +345,47 @@ def main(c, exp_name="all", sampling="inverse"):
 
     f1_model = pd.DataFrame(columns=["epoch", "train"])
 
-    train_results, _, _ = cnn_utils.evaluate(
-        data_loader, 
-        classes, 
-        model, 
-        criterion, 
-        device, 
-        pos_label=1,
-        wandb=wandb, 
-        logging=logging
-    )
-
-    f1_model.loc[len(f1_model)] = {"epoch": 0, "train": train_results["f1_score"]}
-
     for epoch in range(1, n_epochs + 1):
         logging.info("\nEpoch {}/{}".format(epoch, n_epochs))
+
+        if epoch > 1:
+            # Delete previous dataset and dataloader
+            del dataset
+            del data_loader
+            torch.cuda.empty_cache()
+        
+        data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, len(cluster_1_rows), len(cluster_2_rows), data.copy(), sampling)
+        data_ns_c1.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_1.csv"))
+        data_ns_c2.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_2.csv"))
+        data_ns = pd.concat([data_ns_c1, data_ns_c2])
+
+        images_non_school = []
+        for i, row in data_ns.iterrows():
+            image_file = f"/mnt/sdb/agorup/school_mapping/satellite_images/large/VNM/non_school/{row['UID']}.jpeg"
+            images_non_school.append(image_file)
+
+        df = pd.DataFrame(columns=["filepath","UID","class"])
+        for i in range(len(images_school)):
+            img = images_school[i]
+            uid = img.split("/")[-1].replace(".jpeg", "")
+            row = {"filepath":img, "UID": uid, "class":"school"}
+            df.loc[len(df)] = row
+
+        for i in range(len(images_non_school)):
+            img = images_non_school[i]
+            uid = img.split("/")[-1].replace(".jpeg", "")
+            row = {"filepath":img, "UID": uid, "class":"non_school"}
+            df.loc[len(df)] = row
+        df.to_csv(os.path.join(data_dir, f"ep{epoch}_df.csv"), index=False)
+
+        dataset = SchoolDataset(df, classes_dict, train_transform)
+        data_loader = torch.utils.data.DataLoader(
+                dataset,
+                batch_size=c["batch_size"],
+                num_workers=c["n_workers"],
+                shuffle=True,
+                drop_last=False
+            )
 
         # Train model
         train_results = cnn_utils.train(
