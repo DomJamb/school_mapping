@@ -83,12 +83,17 @@ def compare(anditi_path, preds_path, anditi_save_path, preds_save_path, stats_pa
 
     # Save pair dataframe
     df_closest_preds = pd.DataFrame(closest_preds_rows, columns=['Anditi_img', 'closest_prediction', 'prob', 'distance'])
+    # df_closest_preds.to_csv('./anditi_closest_preds_pairs.csv', index=False)
     df_closest_preds.to_csv('./anditi_closest_preds_pairs_NMS.csv', index=False)
 
     # Save closest preds probabilities histogram
     plt.hist(np.array(df_closest_preds['prob'], dtype=np.float32))
     plt.xlabel('Probability')
     plt.ylabel('Count')
+
+    # plt.title('False negatives probability (no NMS)')
+    # plt.savefig('./anditi_closest_preds_probs_hist.png')
+
     plt.title('False negatives probability (NMS)')
     plt.savefig('./anditi_closest_preds_probs_hist_NMS.png')
 

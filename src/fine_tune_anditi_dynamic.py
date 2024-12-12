@@ -272,7 +272,10 @@ def plot_f1(cwd):
     plt.plot(f1_model['epoch'], f1_model['train'])
     plt.savefig(os.path.join(cwd, 'F1_train.png'))
 
-def main(c, exp_name="all", sampling="inverse"):
+def main(c, exp_name="all", sampling="inverse", ns_sampling_factor=1):
+    print(f'Chosen sampling method: {sampling}')
+    print(f'Chosen nonschool sampling factor: {ns_sampling_factor}')
+
     cwd = os.path.dirname(os.getcwd())
     exp_dir = os.path.join(cwd, c["exp_dir"], exp_name)
     print(exp_dir)
@@ -354,7 +357,7 @@ def main(c, exp_name="all", sampling="inverse"):
             del data_loader
             torch.cuda.empty_cache()
         
-        data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, len(cluster_1_rows), len(cluster_2_rows), data.copy(), sampling)
+        data_ns_c1, data_ns_c2 = sample_non_schools(cluster_1_rows, cluster_2_rows, len(cluster_1_rows) * ns_sampling_factor, len(cluster_2_rows) * ns_sampling_factor, data.copy(), sampling)
         data_ns_c1.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_1.csv"))
         data_ns_c2.to_csv(os.path.join(data_dir, f"ep{epoch}_non_schools_cluster_2.csv"))
         data_ns = pd.concat([data_ns_c1, data_ns_c2])
@@ -457,6 +460,7 @@ if __name__ == "__main__":
     # Parser
     parser = argparse.ArgumentParser(description="Model Training")
     parser.add_argument("--sampling", help="Chosen non-school sampling method", default="inverse")
+    parser.add_argument("--ns_sampling_factor", help="Chosen nonschool sample size factor", type=int, default=1)
     parser.add_argument("--cnn_config", help="Config file", default="convnext_small")
     parser.add_argument('-d', "--device", help="device", default="cuda:0")
     parser.add_argument('-e', "--exp_name", default="global_no_vietnam_500images_no_lowres_continuous_rotation_0-90_crop352_no_AMP_convnext_small/fine_tune_vietnam_large")
@@ -468,4 +472,4 @@ if __name__ == "__main__":
     config_file = os.path.join(cwd, "configs", "cnn_configs", args.cnn_config + ".yaml")
     c = config_utils.load_config(config_file)
 
-    main(c, args.exp_name, args.sampling)
+    main(c, args.exp_name, args.sampling, args.ns_sampling_factor)
