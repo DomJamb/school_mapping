@@ -283,7 +283,7 @@ def main(c, exp_name="all", sampling="inverse", ns_sampling_factor=1):
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
 
-    finetune_dir = os.path.join(cwd, c["exp_dir"], "fine_tune_anditi_dynamic", sampling)
+    finetune_dir = os.path.join(cwd, c["exp_dir"], f"fine_tune_anditi_dynamic_1_{ns_sampling_factor}", sampling)
     if not os.path.exists(finetune_dir):
         os.makedirs(finetune_dir)
 
