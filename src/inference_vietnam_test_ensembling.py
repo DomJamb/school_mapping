@@ -119,8 +119,8 @@ def inference(c, exp, device="cuda:0"):
         lon = row["longitude"]
         lat = row["latitude"]
         geom = pyproj_transformer.transform(lon,lat)
-        geom_lon = f"{geom[0]}N" if geom[0] >= 0 else f"{-1*geom[0]}S"
-        geom_lat = f"{geom[1]}E" if geom[1] >= 0 else f"{-1*geom[1]}W"
+        geom_lon = f"{geom[0]}E" if geom[0] >= 0 else f"{-1*geom[0]}W"
+        geom_lat = f"{geom[1]}N" if geom[1] >= 0 else f"{-1*geom[1]}S"
         images.append({"filepath":image_file, "image":image, "lat":geom_lat, "lon":geom_lon})
 
     df_images = pd.DataFrame(images)
