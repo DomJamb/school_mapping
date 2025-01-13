@@ -107,9 +107,9 @@ def inference(c, exp, device="cuda:0"):
     - None
     """
     
-    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference_overlap/large'
+    dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference_exhaustive_overlap/large'
     
-    f = "/mnt/sdb/agorup/school_mapping/inference_data/inference_overlap_filtered_ghsl.csv"
+    f = "/mnt/sdb/agorup/school_mapping/inference_data/exhaustive/inference_overlap_filtered_ghsl.csv"
     df = pd.read_csv(f)
     images = []
     for i, row in df.iterrows():
@@ -133,7 +133,7 @@ def inference(c, exp, device="cuda:0"):
     model_file = os.path.join(exp_dir, f"fine_tune_model.pth")
     if not os.path.exists(model_file):
         model_file = os.path.join(exp_dir, f"{exp_name}.pth")
-    out_file = os.path.join(exp_dir, "inference_vietnam_filtered_ensembling_rotation_mean.csv")
+    out_file = os.path.join(exp_dir, "inference_vietnam_exhaustive_filtered_ensembling_rotation_mean.csv")
 
     if not os.path.exists(exp_dir) or not os.path.exists(model_file):
         print("wrong paths")
@@ -251,7 +251,7 @@ def main():
     # Parser
     parser = argparse.ArgumentParser(description="Satellite Image Download")
     parser.add_argument('-c', "--cnn_config", help="Config file", default="convnext_small")
-    parser.add_argument("-e", "--exp", default="fine_tune_anditi/gaussian")
+    parser.add_argument("-e", "--exp", default="fine_tune_anditi_dynamic_1_10/gaussian")
     parser.add_argument('-d', "--device", help="device", default="cuda:0")
     args = parser.parse_args()
 
