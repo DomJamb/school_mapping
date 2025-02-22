@@ -121,5 +121,12 @@ def main():
     print(f'Final recall: {recall_final * 100:.4f}%')
     print(f'Final F1 score: {f1_final * 100:.4f}%')
 
+    # Get metrics for 0.5 threshold
+    precision_05, recall_05, f1_05 = calculate_metrics(df_preds.copy(), df_schools.copy(), 0.5, verbose=False)
+
+    print(f'\nPrecision (0.5 threshold): {precision_05 * 100:.4f}%')
+    print(f'Recall (0.5 threshold): {recall_05 * 100:.4f}%')
+    print(f'F1 score (0.5 threshold): {f1_05 * 100:.4f}%')
+
 if __name__ == '__main__':
     main()
