@@ -188,10 +188,10 @@ def main():
         axes[i].set_ylabel(metric)
         axes[i].legend()
 
-    # # Save figures
-    # figs[0].savefig('./precision_comparison.png')
-    # figs[1].savefig('./recall_comparison.png')
-    # figs[2].savefig('./f1_comparison.png')
+    # Save figures
+    figs[0].savefig('./precision_comparison.png')
+    figs[1].savefig('./recall_comparison.png')
+    figs[2].savefig('./f1_comparison.png')
 
 if __name__ == '__main__':
     main()

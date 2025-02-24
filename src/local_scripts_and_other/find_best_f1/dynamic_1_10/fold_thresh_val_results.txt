@@ -66,8 +66,16 @@ Recall: 97.3333%
 F1 score: 60.0823%
 ==============================
 
-Final results (mean +- stddev)
+Final results
 Threshold: 3.96 +- 0.11%
+All thresholds: 3.95%, 4.13%, 3.94%, 3.81%
+==============================
+Main fold
 Precision: 51.56 +- 9.99%
 Recall: 92.38 +- 7.47%
 F1 score: 65.12 +- 5.77%
+==============================
+Other folds
+Precision: 46.28 +- 2.16%
+Recall: 85.22 +- 13.28%
+F1 score: 59.53 +- 3.81%
