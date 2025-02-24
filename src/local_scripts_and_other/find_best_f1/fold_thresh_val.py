@@ -74,9 +74,14 @@ def main():
 
     # Initialize thresholds and metrics list
     final_thresholds = []
+
     final_precisions = []
     final_recalls = []
     final_f1_scores = []
+
+    final_precisions_test = []
+    final_recalls_test = []
+    final_f1_scores_test = []
 
     for i in range(len(folds)):
         # Get current fold, as well as merge other folds
@@ -149,6 +154,10 @@ def main():
         # Get metrics for other folds
         precision_other_folds, recall_other_folds, f1_other_folds = calculate_metrics(df_other_folds.copy(), df_other_schools.copy(), threshold_final, verbose=False)
 
+        final_precisions_test.append(precision_other_folds)
+        final_recalls_test.append(recall_other_folds)
+        final_f1_scores_test.append(f1_other_folds)
+
         print(f'Other wards performance')
         print(f'Precision: {precision_other_folds * 100:.4f}%')
         print(f'Recall: {recall_other_folds * 100:.4f}%')
@@ -156,11 +165,20 @@ def main():
         print(f'==============================\n')
 
     # Print threshold and metrics mean +- stddev values
-    print('Final results (mean +- stddev)')
+    print('Final results')
     print(f'Threshold: {(np.mean(final_thresholds) * 100):.2f} +- {(np.std(final_thresholds) * 100):.2f}%')
+    print(f'==============================')
+
+    print('Main fold')
     print(f'Precision: {(np.mean(final_precisions) * 100):.2f} +- {(np.std(final_precisions) * 100):.2f}%')
     print(f'Recall: {(np.mean(final_recalls) * 100):.2f} +- {(np.std(final_recalls) * 100):.2f}%')
     print(f'F1 score: {(np.mean(final_f1_scores) * 100):.2f} +- {(np.std(final_f1_scores) * 100):.2f}%')
+    print(f'==============================')
+
+    print('Other folds')
+    print(f'Precision: {(np.mean(final_precisions_test) * 100):.2f} +- {(np.std(final_precisions_test) * 100):.2f}%')
+    print(f'Recall: {(np.mean(final_recalls_test) * 100):.2f} +- {(np.std(final_recalls_test) * 100):.2f}%')
+    print(f'F1 score: {(np.mean(final_f1_scores_test) * 100):.2f} +- {(np.std(final_f1_scores_test) * 100):.2f}%')
 
     # Add titles, axis labels and legends
     for i, metric in enumerate(['Precision', 'Recall', 'F1 score']):
