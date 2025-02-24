@@ -1,0 +1,73 @@
+Current ward: Tam Binh Ward (35 predictions, 14 schools)
+Final threshold: 3.8806%
+------------------------------
+Final precision: 52.0000%
+Final recall: 92.8571%
+Final F1 score: 66.6667%
+------------------------------
+Precision (0.5 threshold): 100.0000%
+Recall (0.5 threshold): 7.1429%
+F1 score (0.5 threshold): 13.3333%
+------------------------------
+Other wards performance
+Precision: 39.4444%
+Recall: 73.9583%
+F1 score: 51.4493%
+==============================
+
+Current ward: Linh Xuan Ward (49 predictions, 21 schools)
+Final threshold: 18.0783%
+------------------------------
+Final precision: 59.0909%
+Final recall: 61.9048%
+Final F1 score: 60.4651%
+------------------------------
+Precision (0.5 threshold): 72.7273%
+Recall (0.5 threshold): 38.0952%
+F1 score (0.5 threshold): 50.0000%
+------------------------------
+Other wards performance
+Precision: 70.4545%
+Recall: 34.8315%
+F1 score: 46.6165%
+==============================
+
+Current ward: Binh Chieu Ward (75 predictions, 35 schools)
+Final threshold: 3.1928%
+------------------------------
+Final precision: 45.3333%
+Final recall: 97.1429%
+Final F1 score: 61.8182%
+------------------------------
+Precision (0.5 threshold): 80.0000%
+Recall (0.5 threshold): 22.8571%
+F1 score (0.5 threshold): 35.5556%
+------------------------------
+Other wards performance
+Precision: 42.2857%
+Recall: 98.6667%
+F1 score: 59.2000%
+==============================
+
+Current ward: Hiep Binh Phuoc Ward (90 predictions, 40 schools)
+Final threshold: 5.0626%
+------------------------------
+Final precision: 65.7143%
+Final recall: 57.5000%
+Final F1 score: 61.3333%
+------------------------------
+Precision (0.5 threshold): 90.9091%
+Recall (0.5 threshold): 25.0000%
+F1 score (0.5 threshold): 39.2157%
+------------------------------
+Other wards performance
+Precision: 46.4286%
+Recall: 55.7143%
+F1 score: 50.6494%
+==============================
+
+Final results (mean +- stddev)
+Threshold: 7.55 +- 6.11%
+Precision: 55.53 +- 7.63%
+Recall: 77.35 +- 17.78%
+F1 score: 62.57 +- 2.41%

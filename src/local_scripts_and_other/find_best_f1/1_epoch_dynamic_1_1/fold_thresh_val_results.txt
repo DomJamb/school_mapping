@@ -1,0 +1,73 @@
+Current ward: Linh Xuan Ward (48 predictions, 21 schools)
+Final threshold: 8.3606%
+------------------------------
+Final precision: 50.0000%
+Final recall: 100.0000%
+Final F1 score: 66.6667%
+------------------------------
+Precision (0.5 threshold): 61.9048%
+Recall (0.5 threshold): 61.9048%
+F1 score (0.5 threshold): 61.9048%
+------------------------------
+Other wards performance
+Precision: 57.8231%
+Recall: 95.5056%
+F1 score: 72.0339%
+==============================
+
+Current ward: Hiep Binh Phuoc Ward (90 predictions, 40 schools)
+Final threshold: 13.5821%
+------------------------------
+Final precision: 75.5556%
+Final recall: 85.0000%
+Final F1 score: 80.0000%
+------------------------------
+Precision (0.5 threshold): 88.2353%
+Recall (0.5 threshold): 37.5000%
+F1 score (0.5 threshold): 52.6316%
+------------------------------
+Other wards performance
+Precision: 53.1250%
+Recall: 72.8571%
+F1 score: 61.4458%
+==============================
+
+Current ward: Tam Binh Ward (35 predictions, 14 schools)
+Final threshold: 8.5426%
+------------------------------
+Final precision: 53.8462%
+Final recall: 100.0000%
+Final F1 score: 70.0000%
+------------------------------
+Precision (0.5 threshold): 63.6364%
+Recall (0.5 threshold): 50.0000%
+F1 score (0.5 threshold): 56.0000%
+------------------------------
+Other wards performance
+Precision: 52.7607%
+Recall: 89.5833%
+F1 score: 66.4093%
+==============================
+
+Current ward: Binh Chieu Ward (74 predictions, 35 schools)
+Final threshold: 45.2707%
+------------------------------
+Final precision: 70.5882%
+Final recall: 68.5714%
+Final F1 score: 69.5652%
+------------------------------
+Precision (0.5 threshold): 75.0000%
+Recall (0.5 threshold): 60.0000%
+F1 score (0.5 threshold): 66.6667%
+------------------------------
+Other wards performance
+Precision: 71.1864%
+Recall: 56.0000%
+F1 score: 62.6866%
+==============================
+
+Final results (mean +- stddev)
+Threshold: 18.94 +- 15.35%
+Precision: 62.50 +- 10.81%
+Recall: 88.39 +- 12.98%
+F1 score: 71.56 +- 5.04%

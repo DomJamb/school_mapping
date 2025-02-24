@@ -1,0 +1,73 @@
+Current ward: Linh Xuan Ward (49 predictions, 21 schools)
+Final threshold: 29.8130%
+------------------------------
+Final precision: 82.3529%
+Final recall: 66.6667%
+Final F1 score: 73.6842%
+------------------------------
+Precision (0.5 threshold): 88.8889%
+Recall (0.5 threshold): 38.0952%
+F1 score (0.5 threshold): 53.3333%
+------------------------------
+Other wards performance
+Precision: 92.8571%
+Recall: 29.2135%
+F1 score: 44.4444%
+==============================
+
+Current ward: Tam Binh Ward (36 predictions, 14 schools)
+Final threshold: 5.0320%
+------------------------------
+Final precision: 51.8519%
+Final recall: 100.0000%
+Final F1 score: 68.2927%
+------------------------------
+Precision (0.5 threshold): 100.0000%
+Recall (0.5 threshold): 7.1429%
+F1 score (0.5 threshold): 13.3333%
+------------------------------
+Other wards performance
+Precision: 49.1124%
+Recall: 86.4583%
+F1 score: 62.6415%
+==============================
+
+Current ward: Hiep Binh Phuoc Ward (89 predictions, 40 schools)
+Final threshold: 6.3258%
+------------------------------
+Final precision: 73.1707%
+Final recall: 75.0000%
+Final F1 score: 74.0741%
+------------------------------
+Precision (0.5 threshold): 100.0000%
+Recall (0.5 threshold): 17.5000%
+F1 score (0.5 threshold): 29.7872%
+------------------------------
+Other wards performance
+Precision: 58.2418%
+Recall: 75.7143%
+F1 score: 65.8385%
+==============================
+
+Current ward: Binh Chieu Ward (74 predictions, 35 schools)
+Final threshold: 7.9704%
+------------------------------
+Final precision: 69.6970%
+Final recall: 65.7143%
+Final F1 score: 67.6471%
+------------------------------
+Precision (0.5 threshold): 87.5000%
+Recall (0.5 threshold): 20.0000%
+F1 score (0.5 threshold): 32.5581%
+------------------------------
+Other wards performance
+Precision: 69.8413%
+Recall: 58.6667%
+F1 score: 63.7681%
+==============================
+
+Final results (mean +- stddev)
+Threshold: 12.29 +- 10.17%
+Precision: 69.27 +- 11.07%
+Recall: 76.85 +- 13.85%
+F1 score: 70.92 +- 2.97%
