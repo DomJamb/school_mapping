@@ -126,10 +126,10 @@ def main():
         final_thresholds.append(threshold_final)
         final_precisions.append(precision_final)
         final_recalls.append(recall_final)
-        final_f1_scores.append(final_f1_scores)
+        final_f1_scores.append(f1_final)
 
         # Print final threshold and metrics
-        print(f'Current ward: {curr_ward}')
+        print(f'Current ward: {curr_ward} ({len(df_curr_fold)} predictions, {len(df_curr_schools)} schools)')
         print(f'Final threshold: {threshold_final * 100:.4f}%')
 
         print(f'------------------------------')
@@ -156,11 +156,11 @@ def main():
         print(f'==============================\n')
 
     # Print threshold and metrics mean +- stddev values
-    print('\nFinal results (mean +- stddev)')
-    print(f'Threshold: {np.mean(final_thresholds):.2f} +- {np.std(final_thresholds):.2f}')
-    print(f'Precision: {np.mean(final_precisions):.2f} +- {np.std(final_precisions):.2f}')
-    print(f'Recall: {np.mean(final_recalls):.2f} +- {np.std(final_recalls):.2f}')
-    print(f'F1 score: {np.mean(final_f1_scores):.2f} +- {np.std(final_f1_scores):.2f}')
+    print('Final results (mean +- stddev)')
+    print(f'Threshold: {(np.mean(final_thresholds) * 100):.2f} +- {(np.std(final_thresholds) * 100):.2f}%')
+    print(f'Precision: {(np.mean(final_precisions) * 100):.2f} +- {(np.std(final_precisions) * 100):.2f}%')
+    print(f'Recall: {(np.mean(final_recalls) * 100):.2f} +- {(np.std(final_recalls) * 100):.2f}%')
+    print(f'F1 score: {(np.mean(final_f1_scores) * 100):.2f} +- {(np.std(final_f1_scores) * 100):.2f}%')
 
     # Add titles, axis labels and legends
     for i, metric in enumerate(['Precision', 'Recall', 'F1 score']):
