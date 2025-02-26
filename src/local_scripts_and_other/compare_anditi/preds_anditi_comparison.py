@@ -14,7 +14,7 @@ def parse_coordinates(lon_str, lat_str):
     return (lon, lat)
 
 def compare(anditi_path, preds_path, anditi_save_path, preds_save_path, stats_path):
-    thresh = 0.5
+    thresh = 0.0835
     pyproj_transformer = Transformer.from_crs('EPSG:4326', 'EPSG:3857', always_xy=True)
 
     df_anditi = pd.read_csv(anditi_path)
@@ -61,13 +61,13 @@ def compare(anditi_path, preds_path, anditi_save_path, preds_save_path, stats_pa
             df_anditi.at[i, 'mean_probs'] = containing_rows['pred'].mean()
             df_anditi.at[i, 'max_probs'] = containing_rows['pred'].max()
 
-        if len(containing_rows) > 0 and containing_rows['pred'].max() > 0.5:
+        if len(containing_rows) > 0 and containing_rows['pred'].max() > thresh:
             # Update found Anditi schools counter
             cnt += 1
         
             # Update found_Anditi column
             for index in containing_rows.index:
-                if df_preds.at[index, 'pred'] > 0.5:
+                if df_preds.at[index, 'pred'] > thresh:
                     df_preds.at[index, 'found_Anditi'].append(img)
         else:
             # Find closest prediction
