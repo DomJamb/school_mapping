@@ -1,0 +1,8 @@
+Final threshold: 4.0355%
+Final precision: 51.0989%
+Final recall: 84.5455%
+Final F1 score: 63.6986%
+
+Precision (0.5 threshold): 95.6522%
+Recall (0.5 threshold): 20.0000%
+F1 score (0.5 threshold): 33.0827%
