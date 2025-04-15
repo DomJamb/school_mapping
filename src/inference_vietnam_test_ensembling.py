@@ -159,7 +159,21 @@ def inference(c, exp, device="cuda:0"):
         device=device,
     )
 
-    model.load_state_dict(torch.load(model_file, map_location=device))
+    checkpoint = torch.load(model_file, map_location=device)
+    if 'model' in checkpoint.keys():
+        state_dict = checkpoint['model']
+
+        # Strip module. prefix if present
+        new_state_dict = {}
+        for k, v in state_dict.items():
+            new_k = k.replace('module.', '') if k.startswith('module.') else k
+            new_state_dict[new_k] = v
+        
+        state_dict = new_state_dict
+    else:
+        state_dict = checkpoint
+
+    model.load_state_dict(state_dict) 
     model = model.to(device)
     model.eval()
 
@@ -251,7 +265,7 @@ def main():
     # Parser
     parser = argparse.ArgumentParser(description="Satellite Image Download")
     parser.add_argument('-c', "--cnn_config", help="Config file", default="convnext_small")
-    parser.add_argument("-e", "--exp", default="fine_tune_anditi_dynamic_1_10/gaussian")
+    parser.add_argument("-e", "--exp", default="fine_tune_anditi_30_epoch_static_1_1_ill/gaussian")
     parser.add_argument('-d', "--device", help="device", default="cuda:0")
     args = parser.parse_args()
 
