@@ -42,9 +42,9 @@ def calculate_metrics(df_preds, df_schools, thresh, verbose=False):
     fn = len(df_schools.index) - len(covered_schools)
 
     # Calculate precision, recall and F1 score
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = (2 * precision * recall) / (precision + recall)
+    precision = tp / (tp + fp) if (tp + fp > 0) else 0
+    recall = tp / (tp + fn) if (tp + fn > 0) else 0
+    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall > 0) else 0
 
     if verbose:
         print(f'Precision: {precision * 100:.2f}%')
