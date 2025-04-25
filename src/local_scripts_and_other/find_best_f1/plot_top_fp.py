@@ -11,7 +11,7 @@ if __name__ == '__main__':
     dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference_exhaustive_overlap/large'
     f = "/mnt/sdb/agorup/school_mapping/inference_data/exhaustive/inference_overlap_filtered_ghsl.csv"
 
-    top_n_fp = [('Binh Chieu Ward-213.jpeg', 0.3973814286291599), ('Binh Chieu Ward-212.jpeg', 0.3441606536507606), ('Linh Xuan Ward-44.jpeg', 0.1976517308503389), ('Linh Xuan Ward-7.jpeg', 0.155828493181616), ('Binh Chieu Ward-135.jpeg', 0.1504218745976686), ('Binh Chieu Ward-286.jpeg', 0.087650730391033), ('Linh Xuan Ward-157.jpeg', 0.0820862222462892), ('Linh Xuan Ward-65.jpeg', 0.0764375743456184), ('Linh Xuan Ward-197.jpeg', 0.0643980570603162), ('Linh Xuan Ward-34.jpeg', 0.0631690747104585)]
+    top_n_fp = [('Binh Chieu Ward-190.jpeg', 0.9590598493814468), ('Linh Xuan Ward-179.jpeg', 0.9548553600907326), ('Tam Binh Ward-93.jpeg', 0.9258525520563126), ('Hiep Binh Phuoc Ward-73.jpeg', 0.924198053777218), ('Linh Xuan Ward-155.jpeg', 0.9145309552550316), ('Binh Chieu Ward-56.jpeg', 0.9023766815662384), ('Linh Xuan Ward-151.jpeg', 0.9022977724671364), ('Linh Xuan Ward-83.jpeg', 0.8436941877007484), ('Linh Xuan Ward-204.jpeg', 0.8166244104504585), ('Linh Xuan Ward-52.jpeg', 0.7875362411141396)]
 
     df = pd.read_csv(f)
     images = []
