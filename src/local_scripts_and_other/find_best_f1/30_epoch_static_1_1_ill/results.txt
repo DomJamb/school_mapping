@@ -2,7 +2,11 @@ Final threshold: 0.2117%
 Final precision: 42.3077%
 Final recall: 100.0000%
 Final F1 score: 59.4595%
+Final top 10 FP:
+[('Binh Chieu Ward-213.jpeg', 0.3973814286291599), ('Binh Chieu Ward-212.jpeg', 0.3441606536507606), ('Linh Xuan Ward-44.jpeg', 0.1976517308503389), ('Linh Xuan Ward-7.jpeg', 0.155828493181616), ('Binh Chieu Ward-135.jpeg', 0.1504218745976686), ('Binh Chieu Ward-286.jpeg', 0.087650730391033), ('Linh Xuan Ward-157.jpeg', 0.0820862222462892), ('Linh Xuan Ward-65.jpeg', 0.0764375743456184), ('Linh Xuan Ward-197.jpeg', 0.0643980570603162), ('Linh Xuan Ward-34.jpeg', 0.0631690747104585)]
 
 Precision (0.5 threshold): 0.0000%
 Recall (0.5 threshold): 0.0000%
 F1 score (0.5 threshold): 0.0000%
+Top 10 FP (0.5 threshold):
+[]
