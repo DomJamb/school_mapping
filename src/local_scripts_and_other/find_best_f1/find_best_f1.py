@@ -11,7 +11,7 @@ def parse_coordinates(lon_str, lat_str):
     
     return (lon, lat)
 
-def calculate_metrics(df_preds, df_schools, thresh, top_n_fp=10, verbose=False):
+def calculate_metrics(df_preds, df_schools, thresh, top_n_fp=10, top_n_hardest=10, verbose=False):
     # Initialize FP
     fp = 0
 
@@ -53,13 +53,37 @@ def calculate_metrics(df_preds, df_schools, thresh, top_n_fp=10, verbose=False):
     # Get top N false positives
     top_n_false_positives = sorted(false_positives, key=lambda x: x[1], reverse=True)[:top_n_fp]
 
+    # Initialize hardest schools list
+    hardest_schools = []
+
+    # Iterate over schools
+    for i, row in df_schools.iterrows():
+        # Get lon, lat
+        lon, lat = row['lon'], row['lat']
+        
+        # Find predictions which cover this school
+        df_preds['distance'] = np.sqrt((df_preds['lon'] - lon) ** 2 + (df_preds['lat'] - lat) ** 2)
+        covering_preds = df_preds[df_preds['distance'] < 250]
+
+        if len(covering_preds.index) == 0:
+            # School isn't covered
+            continue
+        else:
+            # Get row with highest pred value
+            max_pred_row = covering_preds.loc[covering_preds['pred'].idxmax()]
+            hardest_schools.append((max_pred_row['image'], max_pred_row['pred']))
+
+    # Get top N hardest schools
+    top_n_hardest_schools = sorted(hardest_schools, key=lambda x: x[1])[:top_n_hardest]
+        
     if verbose:
         print(f'Precision: {precision * 100:.2f}%')
         print(f'Recall: {recall * 100:.2f}%')
         print(f'F1 score: {f1 * 100:.2f}%')
         print(f'Top {top_n_fp} FP:\n{top_n_false_positives}')
+        print(f'Top {top_n_hardest} hardest schools:\n{top_n_hardest_schools}')
 
-    return precision, recall, f1, top_n_false_positives
+    return precision, recall, f1, top_n_false_positives, top_n_hardest_schools
 
 def main():
     # Load data
@@ -77,15 +101,17 @@ def main():
     recalls = []
     f1_scores = []
     top_n_false_positives_list = []
+    top_n_hardest_schools_list = []
 
-    top_n_fp = 10
+    top_n_fp = 5
+    top_n_hardest = 5
 
     for i, row in df_preds.iterrows():
         # Get current threshold
         thresh = row['pred']
 
         # Calculate metrics for current threshold
-        precision, recall, f1, top_n_false_positives = calculate_metrics(df_preds.copy(), df_schools.copy(), thresh, top_n_fp, verbose=False)
+        precision, recall, f1, top_n_false_positives, top_n_hardest_schools = calculate_metrics(df_preds.copy(), df_schools.copy(), thresh, top_n_fp, top_n_hardest, verbose=False)
 
         # Update thresholds and metrics
         threshs.insert(0, thresh)
@@ -93,6 +119,7 @@ def main():
         recalls.insert(0, recall)
         f1_scores.insert(0, f1)
         top_n_false_positives_list.insert(0, top_n_false_positives)
+        top_n_hardest_schools_list.insert(0, top_n_hardest_schools)
 
     # Plot precision
     plt.figure()
@@ -127,6 +154,7 @@ def main():
     recall_final = recalls[best_f1_index]
     f1_final = f1_scores[best_f1_index]
     top_n_false_positives_final = top_n_false_positives_list[best_f1_index]
+    top_n_hardest_schools_final = top_n_hardest_schools_list[best_f1_index]
 
     # Print final threshold and metrics
     print(f'Final threshold: {threshold_final * 100:.4f}%')
@@ -134,14 +162,16 @@ def main():
     print(f'Final recall: {recall_final * 100:.4f}%')
     print(f'Final F1 score: {f1_final * 100:.4f}%')
     print(f'Final top {top_n_fp} FP:\n{top_n_false_positives_final}')
+    print(f'Final top {top_n_hardest} hardest schools:\n{top_n_hardest_schools_final}')
 
     # Get metrics for 0.5 threshold
-    precision_05, recall_05, f1_05, top_n_false_positives_05 = calculate_metrics(df_preds.copy(), df_schools.copy(), 0.5, top_n_fp, verbose=False)
+    precision_05, recall_05, f1_05, top_n_false_positives_05, top_n_hardest_schools_05 = calculate_metrics(df_preds.copy(), df_schools.copy(), 0.5, top_n_fp, top_n_hardest, verbose=False)
 
     print(f'\nPrecision (0.5 threshold): {precision_05 * 100:.4f}%')
     print(f'Recall (0.5 threshold): {recall_05 * 100:.4f}%')
     print(f'F1 score (0.5 threshold): {f1_05 * 100:.4f}%')
     print(f'Top {top_n_fp} FP (0.5 threshold):\n{top_n_false_positives_05}')
+    print(f'Top {top_n_hardest} hardest schools (0.5 threshold):\n{top_n_hardest_schools_05}')
 
 if __name__ == '__main__':
     main()

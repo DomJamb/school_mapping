@@ -11,7 +11,8 @@ if __name__ == '__main__':
     dest_dir = '/mnt/sdb/agorup/school_mapping/satellite_images/inference_exhaustive_overlap/large'
     f = "/mnt/sdb/agorup/school_mapping/inference_data/exhaustive/inference_overlap_filtered_ghsl.csv"
 
-    top_n_fp = [('Binh Chieu Ward-190.jpeg', 0.9590598493814468), ('Linh Xuan Ward-179.jpeg', 0.9548553600907326), ('Tam Binh Ward-93.jpeg', 0.9258525520563126), ('Hiep Binh Phuoc Ward-73.jpeg', 0.924198053777218), ('Linh Xuan Ward-155.jpeg', 0.9145309552550316), ('Binh Chieu Ward-56.jpeg', 0.9023766815662384), ('Linh Xuan Ward-151.jpeg', 0.9022977724671364), ('Linh Xuan Ward-83.jpeg', 0.8436941877007484), ('Linh Xuan Ward-204.jpeg', 0.8166244104504585), ('Linh Xuan Ward-52.jpeg', 0.7875362411141396)]
+    top_n_fp = [('Binh Chieu Ward-213.jpeg', 0.3973814286291599), ('Binh Chieu Ward-212.jpeg', 0.3441606536507606), ('Linh Xuan Ward-44.jpeg', 0.1976517308503389), ('Linh Xuan Ward-7.jpeg', 0.155828493181616), ('Binh Chieu Ward-135.jpeg', 0.1504218745976686)]
+    top_n_hardest = [('Hiep Binh Phuoc Ward-117.jpeg', 0.0021165754296816), ('Hiep Binh Phuoc Ward-117.jpeg', 0.0021165754296816), ('Hiep Binh Phuoc Ward-117.jpeg', 0.0021165754296816), ('Hiep Binh Phuoc Ward-6.jpeg', 0.0023867647687438), ('Hiep Binh Phuoc Ward-57.jpeg', 0.0025978779303841)]
 
     df = pd.read_csv(f)
     images = []
@@ -28,17 +29,32 @@ if __name__ == '__main__':
 
     df_images = pd.DataFrame(images)
 
-    plt.figure(figsize=(18,8))
-    plt.suptitle('Top 10 False Positives', fontsize=20)
+    plt.figure(figsize=(20,4))
+    plt.suptitle(f'Top {len(top_n_fp)} False Positives', fontsize=20)
     
     for i, (fp_image, prob) in enumerate(top_n_fp):
         row = df_images[df_images['image'] == fp_image].iloc[0]
         path = row['filepath']
         img = Image.open(path)
 
-        plt.subplot(2,5,i + 1)
+        plt.subplot(int(len(top_n_fp) / 5),5,i + 1)
         plt.title(f'{fp_image.split('.')[0]}, {prob:.4f}')
         plt.imshow(img)
         plt.axis('off')
 
-    plt.savefig('./top_10_fp.png')
+    plt.savefig(f'./top_{len(top_n_fp)}_fp.png')
+
+    plt.figure(figsize=(20,4))
+    plt.suptitle(f'Top {len(top_n_hardest)} Hardest Schools', fontsize=20)
+    
+    for i, (hardest_image, prob) in enumerate(top_n_hardest):
+        row = df_images[df_images['image'] == hardest_image].iloc[0]
+        path = row['filepath']
+        img = Image.open(path)
+
+        plt.subplot(int(len(top_n_hardest) / 5),5,i + 1)
+        plt.title(f'{hardest_image.split('.')[0]}, {prob:.4f}')
+        plt.imshow(img)
+        plt.axis('off')
+
+    plt.savefig(f'./top_{len(top_n_hardest)}_hardest.png')

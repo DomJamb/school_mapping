@@ -2,11 +2,15 @@ Final threshold: 8.3530%
 Final precision: 56.0847%
 Final recall: 96.3636%
 Final F1 score: 70.9030%
-Final top 10 FP:
-[('Binh Chieu Ward-190.jpeg', 0.9590598493814468), ('Linh Xuan Ward-179.jpeg', 0.9548553600907326), ('Tam Binh Ward-93.jpeg', 0.9258525520563126), ('Hiep Binh Phuoc Ward-73.jpeg', 0.924198053777218), ('Linh Xuan Ward-155.jpeg', 0.9145309552550316), ('Binh Chieu Ward-56.jpeg', 0.9023766815662384), ('Linh Xuan Ward-151.jpeg', 0.9022977724671364), ('Linh Xuan Ward-83.jpeg', 0.8436941877007484), ('Linh Xuan Ward-204.jpeg', 0.8166244104504585), ('Linh Xuan Ward-52.jpeg', 0.7875362411141396)]
+Final top 5 FP:
+[('Binh Chieu Ward-190.jpeg', 0.9590598493814468), ('Linh Xuan Ward-179.jpeg', 0.9548553600907326), ('Tam Binh Ward-93.jpeg', 0.9258525520563126), ('Hiep Binh Phuoc Ward-73.jpeg', 0.924198053777218), ('Linh Xuan Ward-155.jpeg', 0.9145309552550316)]
+Final top 5 hardest schools:
+[('Binh Chieu Ward-204.jpeg', 0.0737074203789234), ('Tam Binh Ward-49.jpeg', 0.0737356962636113), ('Linh Xuan Ward-103.jpeg', 0.0836059693247079), ('Linh Xuan Ward-103.jpeg', 0.0836059693247079), ('Linh Xuan Ward-103.jpeg', 0.0836059693247079)]
 
 Precision (0.5 threshold): 73.0769%
 Recall (0.5 threshold): 51.8182%
 F1 score (0.5 threshold): 60.6383%
-Top 10 FP (0.5 threshold):
-[('Binh Chieu Ward-190.jpeg', 0.9590598493814468), ('Linh Xuan Ward-179.jpeg', 0.9548553600907326), ('Tam Binh Ward-93.jpeg', 0.9258525520563126), ('Hiep Binh Phuoc Ward-73.jpeg', 0.924198053777218), ('Linh Xuan Ward-155.jpeg', 0.9145309552550316), ('Binh Chieu Ward-56.jpeg', 0.9023766815662384), ('Linh Xuan Ward-151.jpeg', 0.9022977724671364), ('Linh Xuan Ward-83.jpeg', 0.8436941877007484), ('Linh Xuan Ward-204.jpeg', 0.8166244104504585), ('Linh Xuan Ward-52.jpeg', 0.7875362411141396)]
+Top 5 FP (0.5 threshold):
+[('Binh Chieu Ward-190.jpeg', 0.9590598493814468), ('Linh Xuan Ward-179.jpeg', 0.9548553600907326), ('Tam Binh Ward-93.jpeg', 0.9258525520563126), ('Hiep Binh Phuoc Ward-73.jpeg', 0.924198053777218), ('Linh Xuan Ward-155.jpeg', 0.9145309552550316)]
+Top 5 hardest schools (0.5 threshold):
+[('Binh Chieu Ward-204.jpeg', 0.0737074203789234), ('Tam Binh Ward-49.jpeg', 0.0737356962636113), ('Linh Xuan Ward-103.jpeg', 0.0836059693247079), ('Linh Xuan Ward-103.jpeg', 0.0836059693247079), ('Linh Xuan Ward-103.jpeg', 0.0836059693247079)]
