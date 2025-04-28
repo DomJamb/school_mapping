@@ -51,7 +51,8 @@ def calculate_metrics(df_preds, df_schools, thresh, top_n_fp=10, top_n_hardest=1
     f1 = (2 * precision * recall) / (precision + recall) if (precision + recall > 0) else 0
 
     # Get top N false positives
-    top_n_false_positives = sorted(false_positives, key=lambda x: x[1], reverse=True)[:top_n_fp]
+    top_n_false_positives_unique = sorted(set(false_positives), key=lambda x: x[1], reverse=True)[:top_n_fp]
+    top_n_false_positives = [(img, pred, false_positives.count((img, pred))) for (img, pred) in top_n_false_positives_unique]
 
     # Initialize hardest schools list
     hardest_schools = []
@@ -74,7 +75,8 @@ def calculate_metrics(df_preds, df_schools, thresh, top_n_fp=10, top_n_hardest=1
             hardest_schools.append((max_pred_row['image'], max_pred_row['pred']))
 
     # Get top N hardest schools
-    top_n_hardest_schools = sorted(hardest_schools, key=lambda x: x[1])[:top_n_hardest]
+    top_n_hardest_schools_unique = sorted(set(hardest_schools), key=lambda x: x[1])[:top_n_hardest]
+    top_n_hardest_schools = [(img, pred, hardest_schools.count((img, pred))) for (img, pred) in top_n_hardest_schools_unique]
         
     if verbose:
         print(f'Precision: {precision * 100:.2f}%')
