@@ -1,0 +1,81 @@
+Current ward: Linh Xuan Ward (46 predictions, 21 schools)
+Final threshold: 74.5409%
+------------------------------
+Final precision: 61.5385%
+Final recall: 76.1905%
+Final F1 score: 68.0851%
+------------------------------
+Precision (0.5 threshold): 50.0000%
+Recall (0.5 threshold): 76.1905%
+F1 score (0.5 threshold): 60.3774%
+------------------------------
+Other wards performance
+Precision: 70.0000%
+Recall: 39.3258%
+F1 score: 50.3597%
+==============================
+
+Current ward: Hiep Binh Phuoc Ward (85 predictions, 40 schools)
+Final threshold: 62.0213%
+------------------------------
+Final precision: 84.3750%
+Final recall: 67.5000%
+Final F1 score: 75.0000%
+------------------------------
+Precision (0.5 threshold): 79.4118%
+Recall (0.5 threshold): 67.5000%
+F1 score (0.5 threshold): 72.9730%
+------------------------------
+Other wards performance
+Precision: 60.8108%
+Recall: 64.2857%
+F1 score: 62.5000%
+==============================
+
+Current ward: Tam Binh Ward (35 predictions, 14 schools)
+Final threshold: 7.4795%
+------------------------------
+Final precision: 45.1613%
+Final recall: 100.0000%
+Final F1 score: 62.2222%
+------------------------------
+Precision (0.5 threshold): 61.5385%
+Recall (0.5 threshold): 57.1429%
+F1 score (0.5 threshold): 59.2593%
+------------------------------
+Other wards performance
+Precision: 44.7619%
+Recall: 97.9167%
+F1 score: 61.4379%
+==============================
+
+Current ward: Binh Chieu Ward (75 predictions, 35 schools)
+Final threshold: 30.7254%
+------------------------------
+Final precision: 61.9048%
+Final recall: 74.2857%
+Final F1 score: 67.5325%
+------------------------------
+Precision (0.5 threshold): 60.0000%
+Recall (0.5 threshold): 68.5714%
+F1 score (0.5 threshold): 64.0000%
+------------------------------
+Other wards performance
+Precision: 60.6742%
+Recall: 72.0000%
+F1 score: 65.8537%
+==============================
+
+Final results
+Threshold: 43.69 +- 26.30%
+All thresholds: 74.54%, 62.02%, 7.48%, 30.73%
+==============================
+Main fold
+Precision: 63.24 +- 13.95%
+Recall: 79.49 +- 12.27%
+F1 score: 68.21 +- 4.54%
+==============================
+Other folds
+Precision: 59.06 +- 9.08%
+Recall: 68.38 +- 20.90%
+F1 score: 60.04 +- 5.82%

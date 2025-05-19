@@ -1,0 +1,16 @@
+Final threshold: 30.7254%
+Final precision: 62.1212%
+Final recall: 74.5455%
+Final F1 score: 67.7686%
+Final top 5 FP:
+[('Linh Xuan Ward-204.jpeg', 0.954477682709694, 1), ('Binh Chieu Ward-190.jpeg', 0.9542009979486464, 1), ('Linh Xuan Ward-155.jpeg', 0.952263668179512, 1), ('Hiep Binh Phuoc Ward-73.jpeg', 0.9507248401641846, 1), ('Linh Xuan Ward-179.jpeg', 0.94310761988163, 1)]
+Final top 5 hardest schools:
+[('Hiep Binh Phuoc Ward-225.jpeg', 0.0785758076235652, 1), ('Hiep Binh Phuoc Ward-356.jpeg', 0.0888670021668076, 2), ('Binh Chieu Ward-179.jpeg', 0.091116888448596, 1), ('Binh Chieu Ward-133.jpeg', 0.09547895565629, 1), ('Hiep Binh Phuoc Ward-265.jpeg', 0.0980538222938776, 2)]
+
+Precision (0.5 threshold): 64.1667%
+Recall (0.5 threshold): 70.0000%
+F1 score (0.5 threshold): 66.9565%
+Top 5 FP (0.5 threshold):
+[('Linh Xuan Ward-204.jpeg', 0.954477682709694, 1), ('Binh Chieu Ward-190.jpeg', 0.9542009979486464, 1), ('Linh Xuan Ward-155.jpeg', 0.952263668179512, 1), ('Hiep Binh Phuoc Ward-73.jpeg', 0.9507248401641846, 1), ('Linh Xuan Ward-179.jpeg', 0.94310761988163, 1)]
+Top 5 hardest schools (0.5 threshold):
+[('Hiep Binh Phuoc Ward-225.jpeg', 0.0785758076235652, 1), ('Hiep Binh Phuoc Ward-356.jpeg', 0.0888670021668076, 2), ('Binh Chieu Ward-179.jpeg', 0.091116888448596, 1), ('Binh Chieu Ward-133.jpeg', 0.09547895565629, 1), ('Hiep Binh Phuoc Ward-265.jpeg', 0.0980538222938776, 2)]
