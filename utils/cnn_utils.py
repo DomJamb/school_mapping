@@ -453,6 +453,65 @@ def train(data_loader, model, criterion, optimizer, device, logging, pos_label, 
     return epoch_results
 
 
+def train_con_loss(data_loader, model, criterion, optimizer, device, logging, pos_label, wandb=None):
+    """
+    Train the model on the provided data (with added consistency loss component).
+
+    Args:
+    - data_loader (torch.utils.data.DataLoader): DataLoader containing training data.
+    - model (torch.nn.Module): The neural network model.
+    - criterion: Loss function.
+    - optimizer: Optimization algorithm.
+    - device (str): Device to run the training on (e.g., 'cuda' or 'cpu').
+    - logging: Logging object to record training information.
+    - wandb: Weights & Biases object for logging if available. Defaults to None.
+
+    Returns:
+    - dict: Results of the training including loss and evaluation metrics.
+    """
+    
+    model.train()
+
+    y_actuals, y_preds = [], []
+    running_loss = 0.0
+    for inputs, labels, _ in tqdm(data_loader, total=len(data_loader)):
+        inputs_strong = inputs['strong'].to(device)
+        inputs_weak = inputs['weak'].to(device)
+        labels = labels.to(device)
+
+        optimizer.zero_grad()
+
+        logits_strong = model(inputs_strong)
+        logits_weak = model(inputs_weak)
+
+        ln_probs_strong = nnf.log_softmax(logits_strong, dim=1)
+        ln_probs_weak = nnf.log_softmax(logits_weak, dim=1).detach()
+
+        _, preds_strong = torch.max(logits_strong, 1)
+        loss = criterion(logits_strong, labels)
+
+        con_loss = nnf.kl_div(ln_probs_strong, ln_probs_weak, reduction='batchmean', log_target=True)
+        loss += con_loss
+
+        loss.backward()
+        optimizer.step()
+
+        running_loss += loss.item() * inputs_strong.size(0)
+        y_actuals.extend(labels.cpu().numpy().tolist())
+        y_preds.extend(preds_strong.data.cpu().numpy().tolist())
+
+    epoch_loss = running_loss / len(data_loader)
+    epoch_results = eval_utils.evaluate(y_actuals, y_preds, pos_label)
+    epoch_results["loss"] = epoch_loss
+
+    learning_rate = optimizer.param_groups[0]["lr"]
+    logging.info(f"Train Loss: {epoch_loss} {epoch_results} LR: {learning_rate}")
+
+    #if wandb is not None:
+        #wandb.log({"train_" + k: v for k, v in epoch_results.items()})
+    return epoch_results
+
+
 def evaluate(data_loader, class_names, model, criterion, device, logging, pos_label, wandb=None, threshold=0.5):
     """
     Evaluate the model using the provided data.
