@@ -482,10 +482,11 @@ def train_con_loss(data_loader, model, criterion, optimizer, device, logging, po
         optimizer.zero_grad()
 
         logits_strong = model(inputs_strong)
-        logits_weak = model(inputs_weak)
+        with torch.no_grad():
+            logits_weak = model(inputs_weak)
 
         ln_probs_strong = nnf.log_softmax(logits_strong, dim=1)
-        ln_probs_weak = nnf.log_softmax(logits_weak, dim=1).detach()
+        ln_probs_weak = nnf.log_softmax(logits_weak, dim=1)
 
         _, preds_strong = torch.max(logits_strong, 1)
         loss = criterion(logits_strong, labels)
@@ -497,8 +498,8 @@ def train_con_loss(data_loader, model, criterion, optimizer, device, logging, po
         optimizer.step()
 
         running_loss += loss.item() * inputs_strong.size(0)
-        y_actuals.extend(labels.cpu().numpy().tolist())
-        y_preds.extend(preds_strong.data.cpu().numpy().tolist())
+        y_actuals.extend(labels.detach().cpu().numpy().tolist())
+        y_preds.extend(preds_strong.data.detach().cpu().numpy().tolist())
 
     epoch_loss = running_loss / len(data_loader)
     epoch_results = eval_utils.evaluate(y_actuals, y_preds, pos_label)
