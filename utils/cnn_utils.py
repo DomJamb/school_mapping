@@ -539,6 +539,9 @@ def evaluate(data_loader, class_names, model, criterion, device, logging, pos_la
     confusion_matrix = torch.zeros(len(class_names), len(class_names))
 
     for inputs, labels, uids in tqdm(data_loader, total=len(data_loader)):
+        if isinstance(inputs, dict):
+            inputs = inputs['strong']
+    
         inputs = inputs.to(device)
         labels = labels.to(device)
 
